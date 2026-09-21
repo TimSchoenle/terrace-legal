@@ -253,11 +253,14 @@ jobs:
             # The markdown target renders through a Dioxus VirtualDom, which keeps a fixed
             # per-thread runtime allocation alive until exit. LeakSanitizer reports it against
             # whichever input ran last, even the empty one, so that target runs without it.
+            # libFuzzer's own `-detect_leaks=0` does not cover the at-exit check that ASan runs,
+            # so the sanitizer option has to be set in the environment.
             leaks=1
             [ "$target" = markdown ] && leaks=0
-            cargo fuzz run --target "$host" "$target" \
-              "fuzz/corpus/$target" "fuzz/seeds/$target" \
-              -- -dict=fuzz/dictionaries/legal.dict -max_total_time=60 -detect_leaks="$leaks"
+            ASAN_OPTIONS="detect_leaks=$leaks" \
+              cargo fuzz run --target "$host" "$target" \
+                "fuzz/corpus/$target" "fuzz/seeds/$target" \
+                -- -dict=fuzz/dictionaries/legal.dict -max_total_time=60 -detect_leaks="$leaks"
           done
 
   # Each published package installed the way a consumer installs it: a bare `git =` with no `path`.
