@@ -16,9 +16,21 @@
 #
 #     bash .github/scripts/readme-variables.sh
 #
+# With `--emit-manifest <path>` it instead writes a one-package manifest to <path> and prints
+# nothing. The `readme-variables` action reads a `[package]` table with literal values, and this
+# repository has neither: the root is a virtual workspace and its members inherit every field with
+# `version.workspace = true`. The emitted file carries the `[workspace.package]` values in the
+# shape the action reads, so `Cargo.toml` stays the only place they are written down.
+#
 # Deliberately POSIX tools only, no `jq`: it is not present in a default Git for Windows shell,
 # and a script that only runs on the CI runner is a script nobody checks their edit against.
 set -euo pipefail
+
+emit_path=""
+if [ "${1:-}" = "--emit-manifest" ]; then
+    emit_path="${2:?readme-variables: --emit-manifest needs an output path}"
+    shift 2
+fi
 
 manifest="${1:-Cargo.toml}"
 
@@ -45,7 +57,22 @@ field() {
     printf '%s' "${value}"
 }
 
+# Free text, so it cannot use the version alphabet; it is only refused when it would need escaping.
+description="$(field description '^[^"\]+$')"
+license="$(field license '^[0-9A-Za-z][0-9A-Za-z.+ -]*$')"
 version="$(field version '^[0-9A-Za-z][0-9A-Za-z.+-]*$')"
 msrv="$(field rust-version '^[0-9]+(\.[0-9]+){0,2}$')"
+
+if [ -n "${emit_path}" ]; then
+    {
+        echo '[package]'
+        echo 'name = "terrace-legal"'
+        echo "description = \"${description}\""
+        echo "version = \"${version}\""
+        echo "rust-version = \"${msrv}\""
+        echo "license = \"${license}\""
+    } > "${emit_path}"
+    exit 0
+fi
 
 printf '{"version":"%s","tag":"v%s","msrv":"%s"}\n' "${version}" "${version}" "${msrv}"
