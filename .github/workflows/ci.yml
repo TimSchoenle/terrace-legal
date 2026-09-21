@@ -250,9 +250,14 @@ jobs:
         run: |
           host="$(rustc -vV | sed -n 's/^host: //p')"
           for target in accept_language locale_tag config_load markdown; do
+            # The markdown target renders through a Dioxus VirtualDom, which keeps a fixed
+            # per-thread runtime allocation alive until exit. LeakSanitizer reports it against
+            # whichever input ran last, even the empty one, so that target runs without it.
+            leaks=1
+            [ "$target" = markdown ] && leaks=0
             cargo fuzz run --target "$host" "$target" \
               "fuzz/corpus/$target" "fuzz/seeds/$target" \
-              -- -dict=fuzz/dictionaries/legal.dict -max_total_time=60
+              -- -dict=fuzz/dictionaries/legal.dict -max_total_time=60 -detect_leaks="$leaks"
           done
 
   # Each published package installed the way a consumer installs it: a bare `git =` with no `path`.
