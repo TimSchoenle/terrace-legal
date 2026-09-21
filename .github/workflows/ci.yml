@@ -1,0 +1,529 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    # Weekly, so `cargo deny` catches an advisory published against an unchanged tree. The
+    # advisory database moves without this repository changing.
+    - cron: "0 4 * * 1"
+  workflow_dispatch:
+
+# Nothing granted by default: each job requests only the scopes it needs.
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: "-D warnings"
+
+jobs:
+  fmt:
+    name: fmt
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
+        with:
+          components: rustfmt
+      - run: cargo fmt --all --check
+      # `fuzz/` is a workspace of its own, so `--all` at the root never reaches it.
+      - run: cargo fmt --check
+        working-directory: fuzz
+
+  clippy:
+    name: clippy (${{ matrix.features }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        # Every feature set is linted on its own. `--all-features` alone never builds the
+        # configuration a host without consent ships, and a feature-only build can refer to an item
+        # that only another feature defines.
+        features:
+          - "--all-features"
+          - "--no-default-features"
+          - "--no-default-features --features consent"
+          - "--no-default-features --features utoipa"
+          - "--no-default-features --features testing"
+          - "--no-default-features --features router"
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        with:
+          egress-policy: audit
+      - uses: TimSchoenle/actions/actions/rust/clippy@90667cd95bd8ee306fbd54412c2e082448fb5a40
+        with:
+          clippy_arguments: --workspace ${{ matrix.features }} --all-targets
+
+  test:
+    name: test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        # The harness tests exercise file paths and file watching, which differ on Windows.
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        with:
+          egress-policy: audit
+      - uses: TimSchoenle/actions/actions/rust/test@90667cd95bd8ee306fbd54412c2e082448fb5a40
+        with:
+          # `--workspace`, so every crate is tested, and `--all-features`, which is what compiles
+          # the integration tests at all: a test file whose `cfg` is not satisfied is silently
+          # empty rather than a failure.
+          test_arguments: --workspace --all-features
+
+  # The wire-shape and configuration-refusal tests assert different things with `consent` off, and
+  # a test whose `cfg` is not satisfied is empty rather than failing. `testing` stays on because
+  # the loader tests need the harness.
+  test-consent-off:
+    name: test (consent off)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        with:
+          egress-policy: audit
+      - uses: TimSchoenle/actions/actions/rust/test@90667cd95bd8ee306fbd54412c2e082448fb5a40
+        with:
+          test_arguments: --workspace --no-default-features --features testing
+
+  # A build of each feature set on its own, with no dev-dependencies in the graph. This is the job
+  # that catches a feature only unified in by a dev-dependency: `cargo test --all-features` passes
+  # while a consumer's build does not.
+  features:
+    name: features (${{ matrix.features }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        features:
+          - "--no-default-features"
+          - "--no-default-features --features consent"
+          - "--no-default-features --features utoipa"
+          - "--no-default-features --features testing"
+          - "--no-default-features --features router"
+          - "--all-features"
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        with:
+          egress-policy: audit
+      - uses: TimSchoenle/actions/actions/rust/cargo-check@90667cd95bd8ee306fbd54412c2e082448fb5a40
+        with:
+          check_arguments: --workspace --lib ${{ matrix.features }}
+
+  # The three crates that ship into a browser bundle have to build for it, in both feature sets.
+  wasm32:
+    name: wasm32
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
+        with:
+          target: wasm32-unknown-unknown
+      - name: Check for wasm32
+        run: |
+          for crate in terrace-legal-model terrace-legal-dioxus terrace-legal-markdown; do
+            for features in "" "--all-features"; do
+              echo "::group::${crate} ${features}"
+              cargo check -p "${crate}" ${features} --target wasm32-unknown-unknown
+              echo "::endgroup::"
+            done
+          done
+
+  doc:
+    name: doc
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    env:
+      RUSTDOCFLAGS: "-D warnings"
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
+      # Once per feature set: the documentation is itself feature-gated, so a broken intra-doc link
+      # can hide in a set `--all-features` never renders.
+      - run: cargo doc --workspace --no-deps --all-features
+      - run: cargo doc --workspace --no-deps --no-default-features
+      - run: cargo doc --workspace --no-deps --no-default-features --features consent
+      - run: cargo doc --workspace --no-deps --no-default-features --features utoipa
+      - run: cargo doc --workspace --no-deps --no-default-features --features testing
+      - run: cargo doc --workspace --no-deps --no-default-features --features router
+      # The only step that runs the doctests at all: `test` delegates to `cargo nextest`, which does
+      # not run them by design. It is also the job that sets `RUSTDOCFLAGS`, so a doctest carrying
+      # a rustdoc warning fails here.
+      - run: cargo test --workspace --doc --all-features
+      - run: cargo test --workspace --doc --no-default-features
+
+  # `fuzz/` is a workspace of its own on a nightly toolchain, so none of the jobs above touch it.
+  #
+  # Two things run here. The replay suite is the gate: it re-runs every committed seed and a
+  # deterministic sweep through the oracles on a plain `cargo test`, no sanitizer involved, and a
+  # reproducer promoted into `corpus/` keeps being checked forever. The short campaign after it is a
+  # smoke test that the libFuzzer plumbing still links, not a hunt: a real hunt is a person running
+  # `cargo fuzz run` for hours.
+  fuzz:
+    name: fuzz
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
+        with:
+          toolchain: nightly
+          components: clippy
+      - uses: taiki-e/install-action@84f5ac3124727fb3d284d4d22ee9ab3654fd09a6 # v2.87.7
+        with:
+          tool: cargo-fuzz
+      - name: Replay the corpus
+        working-directory: fuzz
+        env:
+          # Larger than the local default: this runs once per push, not on every `cargo test`.
+          LEGAL_FUZZ_ITERATIONS: "5000"
+        run: cargo test
+      - name: Lint the oracles
+        working-directory: fuzz
+        run: cargo clippy --all-targets
+      # The `doc` job cannot reach here: `fuzz/` is a workspace of its own. Without this step its
+      # `[lints.rustdoc]` table is declared and enforced by nothing.
+      - name: Document the oracles
+        working-directory: fuzz
+        env:
+          RUSTDOCFLAGS: "-D warnings"
+        run: cargo doc --lib --no-deps
+      - name: Short campaign
+        run: |
+          host="$(rustc -vV | sed -n 's/^host: //p')"
+          for target in accept_language locale_tag config_load markdown; do
+            cargo fuzz run --target "$host" "$target" \
+              "fuzz/corpus/$target" "fuzz/seeds/$target" \
+              -- -dict=fuzz/dictionaries/legal.dict -max_total_time=60
+          done
+
+  # Each published package installed the way a consumer installs it: a bare `git =` with no `path`.
+  # Cargo has to find five packages in one repository, and a package that only builds inside the
+  # workspace, because a path dependency papers over a missing version, fails here.
+  consumer-smoke-test:
+    name: consumer smoke test (${{ matrix.package }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        package:
+          - terrace-legal-model
+          - terrace-legal
+          - terrace-legal-axum
+          - terrace-legal-dioxus
+          - terrace-legal-markdown
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
+        with:
+          target: wasm32-unknown-unknown
+      - name: Build a throwaway consumer
+        env:
+          PACKAGE: ${{ matrix.package }}
+        run: |
+          set -euo pipefail
+          smoke="$(mktemp -d)/smoke"
+          cargo new --lib "${smoke}"
+          cd "${smoke}"
+          cargo add "${PACKAGE}" --git "file://${GITHUB_WORKSPACE}"
+          cargo build
+          case "${PACKAGE}" in
+            terrace-legal-model | terrace-legal-dioxus | terrace-legal-markdown)
+              cargo build --target wasm32-unknown-unknown
+              ;;
+          esac
+
+  deny:
+    name: deny
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: EmbarkStudios/cargo-deny-action@3c6349835b2b7b196a839186cb8b78e02f7b5f25 # v2.1.1
+        with:
+          command: check
+      # `fuzz/` is a second workspace and a second dependency tree, which the root check does not
+      # see.
+      - uses: EmbarkStudios/cargo-deny-action@3c6349835b2b7b196a839186cb8b78e02f7b5f25 # v2.1.1
+        with:
+          command: check
+          manifest-path: fuzz/Cargo.toml
+
+  msrv:
+    name: msrv
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      # Read from the manifest rather than repeated inline, so the pin cannot drift from the
+      # `rust-version` it is meant to verify.
+      - id: msrv
+        run: echo "version=$(grep -m1 '^rust-version' Cargo.toml | cut -d'"' -f2)" >> "$GITHUB_OUTPUT"
+      - uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
+        with:
+          toolchain: ${{ steps.msrv.outputs.version }}
+      - run: cargo check --workspace --all-features --all-targets
+
+  # The dependency rule: every edge points at `terrace-legal-model`. The crates that ship into a
+  # browser bundle must not reach the configuration loader or a server, and the server crates must
+  # not reach the UI framework. `-e normal,build` leaves dev-dependencies out, because a test may
+  # use a runtime the crate itself never links.
+  #
+  # The pattern is anchored, `^<name>( |$)`, because the checkout path contains these words and a
+  # looser one reports a dependency that is not there.
+  boundaries:
+    name: boundaries
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
+      - name: Client crates reach no loader and no server
+        run: |
+          set -euo pipefail
+          for crate in terrace-legal-model terrace-legal-dioxus terrace-legal-markdown; do
+            if cargo tree -p "${crate}" --all-features -e normal,build --prefix none \
+                | grep -E '^(terrace-config|figment|axum|tokio|hyper)( |$)'; then
+              echo "::error::${crate} depends on a loader or a server crate."
+              echo "It ships into a browser bundle, where none of them can be linked."
+              exit 1
+            fi
+            echo "${crate}: clean"
+          done
+      - name: Server crates reach no UI framework
+        run: |
+          set -euo pipefail
+          for crate in terrace-legal terrace-legal-axum; do
+            if cargo tree -p "${crate}" --all-features -e normal,build --prefix none \
+                | grep -E '^dioxus( |$)'; then
+              echo "::error::${crate} depends on dioxus."
+              exit 1
+            fi
+            echo "${crate}: clean"
+          done
+
+  # Two crates hold all the pure logic and configuration handling, and they carry the bar.
+  coverage:
+    name: coverage
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
+        with:
+          components: llvm-tools-preview
+      - uses: taiki-e/install-action@84f5ac3124727fb3d284d4d22ee9ab3654fd09a6 # v2.87.7
+        with:
+          tool: cargo-llvm-cov
+      # The whole workspace runs, because the axum tests are what exercise most of the consent code
+      # in `terrace-legal`. Coverage is then measured on the two crates that carry the bar.
+      - name: Measure
+        run: |
+          cargo llvm-cov --workspace --all-features \
+            --ignore-filename-regex 'crates/terrace-legal-(axum|dioxus|markdown)/|/tests/' \
+            --fail-under-lines 90
+
+  # A table test that passes against a mutated comparator is not testing it. Runs on the three files
+  # that hold the comparisons: `negotiate`, `accept` and `consent::evaluate`. The path filter is a
+  # step rather than a trigger, so the job still reports on every pull request.
+  mutants:
+    name: mutants
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Did the mutated files change?
+        id: changed
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          if [ "${EVENT}" != "pull_request" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if git diff --name-only "${BASE}" HEAD | grep -qE '^crates/terrace-legal-model/src/(negotiate|accept|consent)\.rs$'; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "None of the mutated files changed." >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - if: steps.changed.outputs.run == 'true'
+        uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
+      - if: steps.changed.outputs.run == 'true'
+        uses: taiki-e/install-action@84f5ac3124727fb3d284d4d22ee9ab3654fd09a6 # v2.87.7
+        with:
+          tool: cargo-mutants
+      # Zero survivors: `cargo mutants` exits non-zero when a mutant is missed.
+      - if: steps.changed.outputs.run == 'true'
+        run: |
+          cargo mutants -p terrace-legal-model --all-features \
+            --file crates/terrace-legal-model/src/negotiate.rs \
+            --file crates/terrace-legal-model/src/accept.rs \
+            --file crates/terrace-legal-model/src/consent.rs
+
+  # A design document describes intent at one moment and goes stale as soon as the code diverges,
+  # so no implementation cites it. The section signs and defect identifiers are a review rule, not
+  # part of this pattern: the code cites RFC sections with `§`, and a pattern for them would fail
+  # on legitimate text.
+  design-reference:
+    name: design-reference
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      # The design document itself, the handoff file that points at it, and this workflow, which
+      # has to spell the pattern, are the only files allowed to.
+      - name: No file cites the design document
+        run: |
+          if git grep -nE 'LEGAL_LIBRARY|docs/DESIGN\.md' -- . \
+              ':!docs/Implementation.md' ':!docs/PROGRESS.md' ':!.github/workflows/ci.yml'; then
+            echo "::error::A file cites the design document. Write the reason into the code instead."
+            exit 1
+          fi
+          echo "no citations"
+
+  # The single required check. It fails if any job failed and passes when jobs were skipped, so
+  # branch protection needs one entry that cannot silently stop existing.
+  ci:
+    name: ci
+    if: always()
+    needs:
+      - fmt
+      - clippy
+      - test
+      - test-consent-off
+      - features
+      - wasm32
+      - doc
+      - fuzz
+      - consumer-smoke-test
+      - deny
+      - msrv
+      - boundaries
+      - coverage
+      - mutants
+      - design-reference
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - name: Fail if any job failed
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1
+      - run: echo "all gates green"

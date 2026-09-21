@@ -1,0 +1,75 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "github>TimSchoenle/actions//configs/renovate/default",
+    "customManagers:githubActionsVersions"
+  ],
+  "packageRules": [
+    {
+      "description": "The MSRV is a compatibility promise, not a dependency: `rust-version` in Cargo.toml, the MSRV badge rendered into the README and the `msrv` CI job move together, as a decision.",
+      "matchManagers": [
+        "cargo"
+      ],
+      "matchDepTypes": [
+        "rust-version"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "`fuzz/` is a separate workspace whose lockfile only backs fuzzing. Bumps there are grouped so they cost one pull request rather than one per crate.",
+      "matchFileNames": [
+        "fuzz/Cargo.toml"
+      ],
+      "groupName": "fuzz harness dependencies"
+    },
+    {
+      "description": "A major bump of axum is a breaking release of the library, so the family moves in a single pull request and the library releases before its consumers.",
+      "matchManagers": [
+        "cargo"
+      ],
+      "matchPackageNames": [
+        "axum",
+        "axum-*"
+      ],
+      "matchFileNames": [
+        "Cargo.toml"
+      ],
+      "groupName": "axum"
+    },
+    {
+      "description": "The same for Dioxus, whose crates are versioned together.",
+      "matchManagers": [
+        "cargo"
+      ],
+      "matchPackageNames": [
+        "dioxus",
+        "dioxus-*"
+      ],
+      "matchFileNames": [
+        "Cargo.toml"
+      ],
+      "groupName": "dioxus"
+    },
+    {
+      "description": "utoipa and its companions move together.",
+      "matchManagers": [
+        "cargo"
+      ],
+      "matchPackageNames": [
+        "utoipa",
+        "utoipa-*"
+      ],
+      "groupName": "utoipa"
+    },
+    {
+      "description": "terrace-config is a git dependency pinned by tag; the tag moves on its own.",
+      "matchManagers": [
+        "cargo"
+      ],
+      "matchPackageNames": [
+        "terrace-config"
+      ],
+      "groupName": "terrace-config"
+    }
+  ]
+}

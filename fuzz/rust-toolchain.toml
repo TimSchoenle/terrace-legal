@@ -1,0 +1,12 @@
+# Nightly, and only here. `libfuzzer-sys` compiles the crate under test with
+# `-Z sanitizer=address`, which is nightly-only.
+#
+# This file makes a plain `cargo build` inside this directory work and records the requirement.
+# It does not select the toolchain for `cargo fuzz`, which is run from the repository root: hence
+# the explicit `cargo +nightly fuzz ...` in README.md.
+#
+# `fuzz/` is a workspace of its own so that nightly never reaches `cargo fmt --all`,
+# `cargo clippy --workspace` or the resolution the `msrv` job measures.
+[toolchain]
+channel = "nightly"
+components = ["rust-src", "clippy"]

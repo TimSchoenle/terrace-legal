@@ -1,0 +1,31 @@
+[package]
+name = "terrace-legal-model"
+description = "Wire types, locale negotiation and consent evaluation for operator-configured legal documents."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[features]
+default = []
+# `ToSchema` and `IntoParams` on the wire types.
+utoipa = ["dep:utoipa"]
+# Consent fields on the index entry and document view, and the consent types.
+consent = ["dep:time"]
+
+[dependencies]
+serde = { workspace = true }
+thiserror = { workspace = true }
+time = { workspace = true, optional = true, features = ["serde", "serde-well-known", "parsing", "formatting"] }
+utoipa = { workspace = true, optional = true }
+
+[dev-dependencies]
+proptest = { workspace = true }
+serde_json = { workspace = true }
+time = { workspace = true, features = ["macros", "serde", "serde-well-known", "parsing", "formatting"] }
+
+[lints]
+workspace = true

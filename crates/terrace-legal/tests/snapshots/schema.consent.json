@@ -1,0 +1,137 @@
+{
+  "schema_version": 2,
+  "dialect": {
+    "prefix": "LEGALTEST_",
+    "nesting_separator": "__",
+    "indirection_suffix": "_FILE"
+  },
+  "loader": [
+    {
+      "env": "LEGALTEST_CONFIG",
+      "role": "config",
+      "docs": "Names the TOML layer: a file, or a directory whose `*.toml` files are all merged in name order.",
+      "default": "config.toml"
+    },
+    {
+      "env": "LEGALTEST_SECRETS_DIR",
+      "role": "secrets_dir",
+      "docs": "Names a directory of key-named files — a mounted Kubernetes `Secret` volume. Each file supplies the key its name spells.",
+      "default": null
+    }
+  ],
+  "keys": [
+    {
+      "path": "legal.default_locale",
+      "env": "LEGALTEST_LEGAL__DEFAULT_LOCALE",
+      "env_file": "LEGALTEST_LEGAL__DEFAULT_LOCALE_FILE",
+      "secrets_file": "legal__default_locale",
+      "docs": "Locale served when neither the request nor its `Accept-Language` header matches a\npublished one, for example `en`. Without it, the first published locale in alphabetical\norder is served.",
+      "ty": "String",
+      "values": [],
+      "constraint": {
+        "type": "string"
+      },
+      "text_form": "text",
+      "aliases": [],
+      "env_aliases": [],
+      "env_file_aliases": [],
+      "secrets_file_aliases": [],
+      "default": null,
+      "default_value": null,
+      "note": null,
+      "required": false,
+      "secret": false,
+      "reserved": false
+    },
+    {
+      "path": "legal.documents",
+      "env": "LEGALTEST_LEGAL__DOCUMENTS",
+      "env_file": "LEGALTEST_LEGAL__DOCUMENTS_FILE",
+      "secrets_file": "legal__documents",
+      "docs": "The published documents, keyed by the slug their URL uses. A slug is lowercase letters,\ndigits, `_` and `-`, at most 64 characters, and starts with a letter or a digit.",
+      "ty": "BTreeMap<String, LegalDocument>",
+      "values": [],
+      "constraint": {
+        "additionalProperties": {
+          "additionalProperties": false,
+          "properties": {
+            "body": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "description": "Markdown text per locale, keyed by locale (`en`, `de-AT`). Usually supplied through a\n`…__BODY__<LOCALE>_FILE` variable naming a mounted file. Each text is at most 1 MiB.\nExclusive with `url`.",
+              "type": "object"
+            },
+            "consent": {
+              "additionalProperties": false,
+              "properties": {
+                "effective": {
+                  "description": "The date `version` took effect, as `YYYY-MM-DD`. It starts the grace period.",
+                  "type": "string"
+                },
+                "grace_days": {
+                  "description": "Days after `effective` during which existing users may continue without accepting.\nNeeds `effective` when above zero.",
+                  "maximum": 365,
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "requirement": {
+                  "description": "`none`, `acknowledge` or `accept`. `acknowledge` shows and records the document without\never blocking. `accept` has to be accepted at registration, and by existing users once\nthe grace period ends. Anything but `none` needs `version` and a hosted `body`.",
+                  "enum": [
+                    "none",
+                    "acknowledge",
+                    "accept"
+                  ],
+                  "type": "string"
+                },
+                "version": {
+                  "description": "The operator's revision of the document. Bump it for a material change: readers are asked\nagain only when it changes, so an editorial fix that keeps the version asks nobody.",
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "order": {
+              "description": "Position in the index, lowest first. Documents with the same value are ordered by slug.",
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer"
+            },
+            "title": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "description": "Display title per locale, keyed like `body`.",
+              "type": "object"
+            },
+            "updated": {
+              "description": "The \"last updated\" line, displayed verbatim.",
+              "type": "string"
+            },
+            "url": {
+              "description": "Absolute `http` or `https` URL of a document hosted elsewhere, without credentials.\nExclusive with `body`.",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "type": "object"
+      },
+      "text_constraint": {
+        "pattern": "^\\s*[\\[\\{][\\s\\S]*[\\]\\}]\\s*$",
+        "type": "string"
+      },
+      "text_form": "structured",
+      "aliases": [],
+      "env_aliases": [],
+      "env_file_aliases": [],
+      "secrets_file_aliases": [],
+      "default": "{  }",
+      "default_value": {},
+      "note": null,
+      "required": false,
+      "secret": false,
+      "reserved": false
+    }
+  ]
+}

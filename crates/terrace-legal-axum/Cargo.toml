@@ -1,0 +1,38 @@
+[package]
+name = "terrace-legal-axum"
+description = "HTTP responders and consent routes for terrace-legal, on axum."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[features]
+default = []
+consent = ["terrace-legal/consent", "terrace-legal-model/consent", "dep:thiserror", "dep:time", "dep:tower"]
+utoipa = ["terrace-legal-model/utoipa"]
+# `router::<S>()` for hosts that publish no OpenAPI document.
+router = []
+
+[dependencies]
+axum = { workspace = true }
+http = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+terrace-legal = { workspace = true }
+terrace-legal-model = { workspace = true }
+thiserror = { workspace = true, optional = true }
+time = { workspace = true, optional = true, features = ["std"] }
+tower = { workspace = true, optional = true }
+
+[dev-dependencies]
+http-body-util = { workspace = true }
+terrace-legal = { workspace = true, features = ["testing"] }
+time = { workspace = true, features = ["macros", "std"] }
+tokio = { workspace = true, features = ["macros", "rt"] }
+tower = { workspace = true, features = ["util"] }
+
+[lints]
+workspace = true

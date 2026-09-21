@@ -1,0 +1,66 @@
+name: release-please
+
+# Release automation. `release-please` maintains a single release pull request against `main`,
+# accumulating every conventional commit since the last tag; merging it writes `CHANGELOG.md`,
+# bumps the version in `Cargo.toml`, tags the repository and publishes the GitHub release.
+#
+# One package. All five crates share `[workspace.package] version` and one `v<version>` tag, and
+# that tag is the artefact: nothing is published to crates.io, and a consumer pins it as a git
+# dependency. The version lines in `Cargo.toml` carry an `x-release-please-version` marker
+# because the root manifest is a virtual workspace, which release-please's `rust` updater does not
+# read. `update-files.yaml` refreshes `Cargo.lock` on the release pull request afterwards.
+#
+# The version the README advertises is not maintained here. `docs.yml` re-renders
+# `.github/templates/README.md.hbs` on every pull request from the version in `Cargo.toml`, so the
+# release pull request carries the updated `README.md` with it.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# A release must never be cancelled halfway: the tag, the release and the changelog commit are
+# three separate API calls, and a cancellation between them leaves a state no rerun can infer.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  release-please:
+    name: Release Please
+    environment:
+      name: release
+      deployment: false
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write # to create the release commit, the tag and the GitHub release
+      issues: write # to comment on the issues a release closes
+      pull-requests: write # to open and maintain the release pull request
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        with:
+          egress-policy: audit
+
+      # An App installation token, not `GITHUB_TOKEN`. Commits pushed with the default token do
+      # not trigger workflows, which would leave the release pull request without the `ci` check
+      # it has to pass and without the README render described above.
+      - name: Generate Bot Token
+        id: generate_token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ secrets.RELEASE_BOT_APP_ID }}
+          private-key: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
+          permission-contents: write # release commit, tag and GitHub release
+          permission-pull-requests: write # open and maintain the release pull request
+
+      - name: Run release-please
+        id: release
+        uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5
+        with:
+          token: ${{ steps.generate_token.outputs.token }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json

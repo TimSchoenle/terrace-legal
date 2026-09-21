@@ -1,0 +1,94 @@
+# A workspace of its own, on purpose. `libfuzzer-sys` compiles the crate under test with
+# `-Z sanitizer=address`, which is nightly-only, while the `msrv` job pins 1.94. As a member it
+# would drag nightly into `cargo fmt --all` and `cargo clippy --workspace`.
+[workspace]
+
+[package]
+name = "terrace-legal-fuzz"
+version = "0.0.0"
+edition = "2024"
+authors = ["Tim Schönle"]
+license = "MIT"
+publish = false
+
+[package.metadata]
+cargo-fuzz = true
+
+# The oracles live in a library, not in the target binaries. `cargo fuzz` needs a nightly-only
+# sanitizer, and an oracle that only runs under it is an oracle nobody checks. With the bodies
+# here, `tests/replay.rs` replays the committed corpus on a plain `cargo test`, anywhere, and the
+# fuzzer's job is to find new inputs to add to it.
+[lib]
+name = "terrace_legal_fuzz"
+path = "src/lib.rs"
+
+[dependencies]
+libfuzzer-sys = "0.4"
+# `consent` on, so the configuration oracle reaches the consent rules too.
+terrace-legal = { path = "../crates/terrace-legal", features = ["consent"] }
+terrace-legal-model = { path = "../crates/terrace-legal-model", features = ["consent"] }
+terrace-legal-markdown = { path = "../crates/terrace-legal-markdown" }
+# Restated rather than inherited: this is a workspace of its own. They must not drift below the
+# versions in the root manifest, or a target measures a different parser than the one shipped.
+dioxus = { version = "0.7.10", default-features = false, features = ["macro", "html", "signals", "hooks"] }
+dioxus-ssr = "0.7.10"
+serde_json = "1.0.151"
+
+# `-Z sanitizer=address` instruments the crate under test, so the fuzz binary has to be built with
+# debug assertions on: an overflow that panics is a finding, and one that wraps is not.
+[profile.release]
+debug = true
+debug-assertions = true
+overflow-checks = true
+
+[lints.rust]
+unsafe_code = "forbid"
+# `cargo fuzz` sets `--cfg fuzzing` through RUSTFLAGS, so cargo cannot see it declared anywhere.
+unexpected_cfgs = { level = "warn", check-cfg = ["cfg(fuzzing)"] }
+missing_docs = "warn"
+
+[lints.clippy]
+allow_attributes = "warn"
+allow_attributes_without_reason = "warn"
+missing_errors_doc = "warn"
+missing_panics_doc = "warn"
+doc_markdown = "warn"
+too_long_first_doc_paragraph = "warn"
+doc_link_with_quotes = "warn"
+doc_broken_link = "warn"
+doc_include_without_cfg = "warn"
+
+[lints.rustdoc]
+broken_intra_doc_links = "deny"
+private_intra_doc_links = "warn"
+unescaped_backticks = "warn"
+
+# `test`, `doc` and `bench` are off: a `fuzz_target!` binary has no `main` a test harness can call.
+
+[[bin]]
+name = "accept_language"
+path = "fuzz_targets/accept_language.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "locale_tag"
+path = "fuzz_targets/locale_tag.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "config_load"
+path = "fuzz_targets/config_load.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "markdown"
+path = "fuzz_targets/markdown.rs"
+test = false
+doc = false
+bench = false

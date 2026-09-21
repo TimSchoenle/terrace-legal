@@ -1,0 +1,27 @@
+[package]
+name = "terrace-legal-dioxus"
+description = "Provider, hooks and components that show terrace-legal documents in a Dioxus app."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[features]
+default = []
+consent = ["terrace-legal-model/consent"]
+
+[dependencies]
+dioxus = { workspace = true }
+terrace-legal-markdown = { workspace = true }
+terrace-legal-model = { workspace = true }
+
+[dev-dependencies]
+dioxus-core = { workspace = true }
+dioxus-ssr = { workspace = true }
+tokio = { workspace = true, features = ["macros", "rt", "time"] }
+
+[lints]
+workspace = true
