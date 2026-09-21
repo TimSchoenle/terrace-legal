@@ -157,7 +157,8 @@ pub struct DocumentConsent {
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub struct ConsentStatus {
-    /// One entry per document whose requirement is not [`Requirement::None`], in catalog order.
+    /// One entry per document whose requirement is not `none`, in the order of the document
+    /// index.
     pub documents: Vec<DocumentConsent>,
 }
 

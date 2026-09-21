@@ -40,9 +40,9 @@ pub struct LegalParams {
 }
 
 /// One entry in the index the footer renders.
-///
-/// Every member is always present; an absent value is `null`. The type is `#[non_exhaustive]`, so
-/// build one with [`Self::new`] and the setters.
+// utoipa publishes every `///` line above as the schema's description, so only the summary is `///`.
+// Every member is always present; an absent value is `null`. The type is `#[non_exhaustive]`, so
+// it is built with `LegalIndexEntry::new` and the setters.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[non_exhaustive]
@@ -68,6 +68,9 @@ pub struct LegalIndexEntry {
 
 impl LegalIndexEntry {
     /// Creates an entry with no title, date, URL or locales.
+    ///
+    /// The type is `#[non_exhaustive]`, so this and the `with_*` setters are the only way to build
+    /// one. Every member is always serialised; an absent value is `null`.
     #[must_use]
     pub fn new(slug: impl Into<String>, kind: LegalKind) -> Self {
         Self {
@@ -164,9 +167,9 @@ impl Default for DocumentFormat {
 }
 
 /// One document, in the locale that was actually served.
-///
-/// Every member is always present; an absent value is `null`. The type is `#[non_exhaustive]`, so
-/// build one with [`Self::new`] and the setters.
+// utoipa publishes every `///` line above as the schema's description, so only the summary is `///`.
+// Every member is always present; an absent value is `null`. The type is `#[non_exhaustive]`, so
+// it is built with `LegalDocumentView::new` and the setters.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[non_exhaustive]
@@ -201,6 +204,9 @@ pub struct LegalDocumentView {
 
 impl LegalDocumentView {
     /// Creates a Markdown view with no title or date.
+    ///
+    /// The type is `#[non_exhaustive]`, so this and the `with_*` setters are the only way to build
+    /// one. Every member is always serialised; an absent value is `null`.
     ///
     /// With the `consent` feature the digest of `body` is required too, because an acceptance
     /// quotes it.
@@ -455,19 +461,100 @@ mod tests {
         );
     }
 
+    /// Text in a description that only means something to a Rust reader: intra-doc links, paths,
+    /// attributes and the `#[non_exhaustive]` builder guidance.
+    #[cfg(feature = "utoipa")]
+    const RUST_ONLY_MARKERS: [&str; 5] = ["[`", "Self::", "#[", "non_exhaustive", "crate::"];
+
+    /// Collects every `description` in `value`, with the JSON path it was found at.
+    #[cfg(feature = "utoipa")]
+    fn descriptions<'a>(
+        value: &'a serde_json::Value,
+        path: &str,
+        out: &mut Vec<(String, &'a str)>,
+    ) {
+        match value {
+            serde_json::Value::Object(members) => {
+                for (key, member) in members {
+                    let at = format!("{path}/{key}");
+                    match (key.as_str(), member.as_str()) {
+                        ("description", Some(text)) => out.push((at, text)),
+                        _ => descriptions(member, &at, out),
+                    }
+                }
+            }
+            serde_json::Value::Array(items) => {
+                for (index, item) in items.iter().enumerate() {
+                    descriptions(item, &format!("{path}/{index}"), out);
+                }
+            }
+            _ => {}
+        }
+    }
+
     /// The published schema carries the doc comments as descriptions, so they are part of the
     /// contract a generated client sees.
+    ///
+    /// It pins the bug where text meant for Rust callers was published into the schema: a `///`
+    /// paragraph on a struct told HTTP clients the type is `#[non_exhaustive]` and carried an
+    /// intra-doc link to `Self::new`, and generated clients copied both into their own doc
+    /// comments. The exact struct descriptions are asserted, and every description in the
+    /// document is swept for Rust syntax.
     #[cfg(feature = "utoipa")]
     #[test]
     fn the_wire_types_publish_the_expected_schemas() {
         use utoipa::OpenApi;
 
+        #[cfg(not(feature = "consent"))]
         #[derive(OpenApi)]
         #[openapi(components(schemas(LegalIndexEntry, LegalDocumentView, LegalKind)))]
         struct Api;
 
+        #[cfg(feature = "consent")]
+        #[derive(OpenApi)]
+        #[openapi(components(schemas(
+            LegalIndexEntry,
+            LegalDocumentView,
+            LegalKind,
+            ConsentSummary,
+            crate::consent::Requirement,
+            crate::consent::DocumentConsent,
+            crate::consent::ConsentStatus,
+            crate::consent::Acceptance,
+            crate::consent::Withdrawal,
+        )))]
+        struct Api;
+
         let json = serde_json::to_value(Api::openapi()).expect("serialises");
         let schemas = &json["components"]["schemas"];
+
+        assert_eq!(
+            schemas["LegalIndexEntry"]["description"],
+            "One entry in the index the footer renders."
+        );
+        assert_eq!(
+            schemas["LegalDocumentView"]["description"],
+            "One document, in the locale that was actually served."
+        );
+
+        let params =
+            serde_json::to_value(<LegalParams as utoipa::IntoParams>::into_params(|| None))
+                .expect("serialises");
+        let mut found = Vec::new();
+        descriptions(&json, "", &mut found);
+        descriptions(&params, "/LegalParams", &mut found);
+        assert!(
+            found.len() > 10,
+            "the sweep reached the descriptions: {found:?}"
+        );
+        for (path, text) in &found {
+            for marker in RUST_ONLY_MARKERS {
+                assert!(
+                    !text.contains(marker),
+                    "{path} publishes Rust-only text ({marker:?}): {text:?}"
+                );
+            }
+        }
 
         let kind = &schemas["LegalKind"];
         assert_eq!(kind["type"], "string");
