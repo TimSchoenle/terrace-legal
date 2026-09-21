@@ -40,8 +40,10 @@ jobs:
         with:
           components: rustfmt
       - run: cargo fmt --all --check
-      # `fuzz/` is a workspace of its own, so `--all` at the root never reaches it.
-      - run: cargo fmt --check
+      # `fuzz/` is a workspace of its own, so `--all` at the root never reaches it. Its
+      # `rust-toolchain.toml` pins nightly without rustfmt, so the stable toolchain installed above is
+      # named explicitly rather than letting rustup fetch a nightly that cannot format.
+      - run: cargo +stable fmt --check
         working-directory: fuzz
 
   clippy:
