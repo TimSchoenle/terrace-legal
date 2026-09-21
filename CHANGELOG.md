@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/TimSchoenle/terrace-legal/compare/v0.2.0...v0.2.1) (2026-09-21)
+
+
+### Bug Fixes
+
+* **model:** keep rust-only doc prose out of published schema descriptions ([#14](https://github.com/TimSchoenle/terrace-legal/issues/14)) ([6b18f0c](https://github.com/TimSchoenle/terrace-legal/commit/6b18f0c3927d10cc00642b6e250d9cf1201c9adb))
+
 ## [0.2.0](https://github.com/TimSchoenle/terrace-legal/compare/v0.1.0...v0.2.0) (2026-09-21)
 
 
