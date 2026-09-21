@@ -43,7 +43,7 @@ No legal text ships with the library. Each deployment brings its own.
 
 ```toml
 [dependencies]
-terrace-legal = { git = "https://github.com/TimSchoenle/terrace-legal", tag = "v0.1.0" }
+terrace-legal = { git = "https://github.com/TimSchoenle/terrace-legal", tag = "v0.2.0" }
 ```
 
 Nest the configuration in your own, build a catalog wherever you load configuration, and refuse
@@ -114,8 +114,8 @@ that with `cargo tree`.
 
 ```toml
 [dependencies]
-terrace-legal = { git = "https://github.com/TimSchoenle/terrace-legal", tag = "v0.1.0" }
-terrace-legal-axum = { git = "https://github.com/TimSchoenle/terrace-legal", tag = "v0.1.0", features = ["router"] }
+terrace-legal = { git = "https://github.com/TimSchoenle/terrace-legal", tag = "v0.2.0" }
+terrace-legal-axum = { git = "https://github.com/TimSchoenle/terrace-legal", tag = "v0.2.0", features = ["router"] }
 ```
 
 Cargo finds every package in the repository from one git URL. Pin the tag, not a branch, so that
@@ -125,8 +125,8 @@ The Dioxus pair goes in the frontend's own manifest:
 
 ```toml
 [dependencies]
-terrace-legal-dioxus = { git = "https://github.com/TimSchoenle/terrace-legal", tag = "v0.1.0" }
-terrace-legal-markdown = { git = "https://github.com/TimSchoenle/terrace-legal", tag = "v0.1.0" }
+terrace-legal-dioxus = { git = "https://github.com/TimSchoenle/terrace-legal", tag = "v0.2.0" }
+terrace-legal-markdown = { git = "https://github.com/TimSchoenle/terrace-legal", tag = "v0.2.0" }
 ```
 
 | Feature | Crate | Effect |
@@ -220,7 +220,7 @@ order = 30
 
 | Library | axum | Dioxus | utoipa | terrace-config |
 | --- | --- | --- | --- | --- |
-| `v0.1.0` | 0.8 | 0.7 | 5 | v0.12.0 |
+| `v0.2.0` | 0.8 | 0.7 | 5 | v0.12.0 |
 
 | | Supported |
 | --- | --- |
