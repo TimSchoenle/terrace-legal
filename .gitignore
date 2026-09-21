@@ -80,4 +80,4 @@ desktop.ini
 !/cli/Cargo.lock
 !/cli/fuzz/Cargo.lock
 # Written by docs.yml for the README render; derived from Cargo.toml, never committed.
-.readme-manifest.toml
+.readme-manifest/Cargo.toml

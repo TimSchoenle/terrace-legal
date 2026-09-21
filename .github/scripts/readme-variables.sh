@@ -20,7 +20,8 @@
 # nothing. The `readme-variables` action reads a `[package]` table with literal values, and this
 # repository has neither: the root is a virtual workspace and its members inherit every field with
 # `version.workspace = true`. The emitted file carries the `[workspace.package]` values in the
-# shape the action reads, so `Cargo.toml` stays the only place they are written down.
+# shape the action reads, so `Cargo.toml` stays the only place they are written down. The action picks its parser by the
+# file's basename, so <path> has to end in `Cargo.toml`.
 #
 # Deliberately POSIX tools only, no `jq`: it is not present in a default Git for Windows shell,
 # and a script that only runs on the CI runner is a script nobody checks their edit against.
@@ -64,6 +65,7 @@ version="$(field version '^[0-9A-Za-z][0-9A-Za-z.+-]*$')"
 msrv="$(field rust-version '^[0-9]+(\.[0-9]+){0,2}$')"
 
 if [ -n "${emit_path}" ]; then
+    mkdir -p "$(dirname "${emit_path}")"
     {
         echo '[package]'
         echo 'name = "terrace-legal"'
