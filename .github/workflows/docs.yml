@@ -83,7 +83,7 @@ jobs:
       # reason absent from the diff.
       - name: Collect the README payload
         id: variables
-        uses: TimSchoenle/actions/actions/common/readme-variables@30bc73a560c7aac65f449b23378b9fd7782f8d39 # tag=actions-common-readme-variables-v1.2.0
+        uses: TimSchoenle/actions/actions/common/readme-variables@5edf216e14f1ba5cb4b5444c1bd67b87139a12ac # tag=actions-common-readme-variables-v1.2.2
         with:
           branch: ${{ github.event.repository.default_branch }}
           manifest: .readme-manifest/Cargo.toml
@@ -142,7 +142,7 @@ jobs:
 
       - name: Collect the README payload
         id: variables
-        uses: TimSchoenle/actions/actions/common/readme-variables@30bc73a560c7aac65f449b23378b9fd7782f8d39 # tag=actions-common-readme-variables-v1.2.0
+        uses: TimSchoenle/actions/actions/common/readme-variables@5edf216e14f1ba5cb4b5444c1bd67b87139a12ac # tag=actions-common-readme-variables-v1.2.2
         with:
           branch: ${{ github.event.repository.default_branch }}
           manifest: .readme-manifest/Cargo.toml
