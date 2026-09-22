@@ -318,8 +318,8 @@ impl Refine for CatalogBuilder {
 /// entry:
 ///
 /// - Already in the derived schema: unknown keys (`deny_unknown_fields`), the `order` range, and
-///   with `consent` the `requirement` values and the `grace_days` range. The derived range is
-///   stricter than this check, which skips `grace_days` when `requirement` is `none`.
+///   with `consent` the `requirement` values and the `grace_days` range. Both the range and this
+///   check apply to every requirement, `none` included.
 /// - Expressible exactly with a regular expression the vocabulary cannot yet publish: the slug
 ///   syntax of `documents` entry names, the locale syntax of `body` and `title` entry names and
 ///   of `default_locale`, and non-blank `body` and `title` text. The last needs an explicit
@@ -577,6 +577,11 @@ impl Builder<'_> {
         let config = &source.consent;
         let path = |field: &'static str| ["documents", key, "consent", field];
 
+        // Checked for every requirement, `none` included: the derived schema publishes this range
+        // unconditionally, and a published constraint must never be stricter than this check.
+        if config.grace_days > 365 {
+            self.issue(path("grace_days"), "is above the maximum of 365");
+        }
         if config.requirement == Requirement::None {
             return None;
         }
@@ -603,9 +608,6 @@ impl Builder<'_> {
                 })
                 .ok()
         });
-        if config.grace_days > 365 {
-            self.issue(path("grace_days"), "is above the maximum of 365");
-        }
         if config.grace_days > 0 && config.effective.is_none() {
             self.issue(
                 path("grace_days"),

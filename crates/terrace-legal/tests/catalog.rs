@@ -300,8 +300,21 @@ mod consent {
             requirement: Requirement::None,
             version: None,
             effective: Some("garbage".into()),
-            grace_days: 999,
+            grace_days: 365,
         }));
+    }
+
+    /// The schema publishes the `grace_days` range for every requirement, so the check cannot
+    /// accept above it even where the value is unused.
+    #[test]
+    fn a_grace_period_is_at_most_a_year_even_when_off() {
+        let issues = refused(&with_policy(ConsentPolicy {
+            requirement: Requirement::None,
+            version: None,
+            effective: None,
+            grace_days: 366,
+        }));
+        assert_issue(&issues, &["documents.terms.consent.grace_days", "365"]);
     }
 
     #[test]
