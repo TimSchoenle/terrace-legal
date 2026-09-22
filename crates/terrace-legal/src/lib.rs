@@ -48,11 +48,62 @@
 //! and a hosted `body`, `effective` is a `YYYY-MM-DD` date, and a `grace_days` above zero needs
 //! `effective`.
 //!
-//! # Extending
+//! # Rules
 //!
 //! Nothing here needs a fork to change. A host adds validation with a [`Rule`], registered on a
 //! [`CatalogBuilder`] and kept for every later [`Legal::replace`] through
-//! [`Legal::with_builder`]. [`RequiredDocuments`] is one, and shows the shape. The wire types in
+//! [`Legal::with_builder`]. [`RequiredDocuments`] is one, and shows the shape.
+//!
+//! A rule that only runs at boot is invisible to whoever writes the configuration, so a rule also
+//! states what it checks in the configuration schema, through [`Rule::refinements`]. The builder
+//! implements terrace-config's [`Refine`](terrace_config::schema::Refine), so one call publishes
+//! every registered rule and every built-in check the schema can state, under whatever key the
+//! host mounts the section at. Build the builder in one place and use it for both the schema and
+//! the runtime, and the published contract and the check cannot drift apart:
+//!
+//! ```
+//! use terrace_config::Terrace;
+//! use terrace_config::schema::Describe;
+//! use terrace_legal::{Catalog, CatalogBuilder, LegalConfig, RequiredDocuments};
+//!
+//! #[derive(Default, serde::Serialize, Describe)]
+//! struct HostConfig {
+//!     /// The legal documents.
+//!     #[config(nested)]
+//!     legal: LegalConfig,
+//! }
+//!
+//! /// The one source of the host's legal rules, for the schema and for `Legal::with_builder`.
+//! fn legal_rules() -> CatalogBuilder {
+//!     Catalog::builder().rule(RequiredDocuments::new(["terms", "privacy"]))
+//! }
+//!
+//! # fn main() -> Result<(), terrace_config::Error> {
+//! let schema = Terrace::new("PORTFOLIO_")
+//!     .schema::<HostConfig>()
+//!     .with_defaults_from(&HostConfig::default())?
+//!     .refine_with("legal", &legal_rules())?;
+//!
+//! let documents = schema.keys.iter().find(|key| key.path == "legal.documents").unwrap();
+//! let constraint = documents.constraint.as_ref().unwrap();
+//! assert_eq!(constraint["required"], serde_json::json!(["privacy", "terms"]));
+//! // An empty map is refused at boot, so it is no longer published as the default.
+//! assert!(documents.required);
+//! assert_eq!(documents.default_value, None);
+//! # Ok(())
+//! # }
+//! ```
+//!
+//! A refinement is never stricter than the check it states: any configuration the schema
+//! rejects, the rule rejects too. The schema may say less than the rule, never more. [`Rule`]
+//! documents the invariant a custom rule has to keep.
+//!
+//! The builder, not [`Legal`], is the source: a schema is generated where no configuration has
+//! been loaded, so no catalog, and therefore no [`Legal`], exists yet.
+//!
+//! # Extending
+//!
+//! Beyond rules, the wire types in
 //! [`model`] are `#[non_exhaustive]` and built with setters, so a field can be added without
 //! breaking a caller, and `DocumentFormat` is a value, so a new body format needs no new type.
 //! The consent store, the subject resolver and the clock in the adapters are traits for the same

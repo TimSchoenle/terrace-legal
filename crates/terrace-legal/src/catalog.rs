@@ -5,6 +5,7 @@ use std::fmt;
 use std::sync::Arc;
 
 use sha2::{Digest as _, Sha256};
+use terrace_config::schema::{Refine, Refinement};
 use terrace_legal_model::{Digest, LegalDocumentView, LegalKind, LocaleTag, Slug};
 use url::Url;
 
@@ -202,6 +203,12 @@ impl Catalog {
 /// let issues = builder.build(&LegalConfig::default()).unwrap_err();
 /// assert_eq!(issues.len(), 2);
 /// ```
+///
+/// The builder is also the schema's source for everything it checks: it implements
+/// [`Refine`], publishing the refinements of every registered [`Rule`] together with those of the
+/// built-in checks. A host passes the same builder value to
+/// [`Schema::refine_with`](terrace_config::schema::Schema::refine_with), under the key it mounts
+/// [`LegalConfig`] at, and to [`crate::Legal::with_builder`]. The crate documentation shows it.
 #[derive(Clone, Default)]
 pub struct CatalogBuilder {
     limits: Limits,
@@ -290,6 +297,46 @@ impl CatalogBuilder {
             warnings: builder.warnings,
         })
     }
+}
+
+impl Refine for CatalogBuilder {
+    /// The built-in checks' refinements, then each rule's in registration order. Paths are
+    /// relative to the section, as [`Rule::refinements`] states them.
+    fn refinements(&self) -> Vec<(String, Refinement)> {
+        let mut refinements = built_in_refinements();
+        for rule in &self.rules {
+            refinements.extend(rule.refinements());
+        }
+        refinements
+    }
+}
+
+/// What the built-in checks publish beyond the schema `LegalConfig` derives. Currently nothing.
+///
+/// Every built-in check was audited against the refinement vocabulary, and none can be stated in
+/// it exactly. The only refinement is a map's required entries, and no built-in check requires an
+/// entry:
+///
+/// - Already in the derived schema: unknown keys (`deny_unknown_fields`), the `order` range, and
+///   with `consent` the `requirement` values and the `grace_days` range. The derived range is
+///   stricter than this check, which skips `grace_days` when `requirement` is `none`.
+/// - Expressible exactly with a regular expression the vocabulary cannot yet publish: the slug
+///   syntax of `documents` entry names, the locale syntax of `body` and `title` entry names and
+///   of `default_locale`, and non-blank `body` and `title` text. The last needs an explicit
+///   class of the Unicode `White_Space` characters `str::trim` removes: JSON Schema's `\S` also
+///   treats U+FEFF as blank, which would reject text this check accepts.
+/// - Needing conditional or exclusive keywords the vocabulary lacks: exactly one of `body` and
+///   `url`, and with `consent` a `version`, a hosted `body` and, for a `grace_days` above zero,
+///   `effective`, each only for a requirement other than `none`.
+/// - Not expressible exactly in JSON Schema: two locale keys normalising to the same tag, a
+///   body's size in bytes (`maxLength` counts characters), URL parsing, and `effective`, which
+///   the parser accepts in every ISO 8601 date form (`20260922`, `2026-265`, `2026-W39-2`), so a
+///   `YYYY-MM-DD` pattern would reject valid dates.
+///
+/// A refinement belongs here once the vocabulary can state a check without rejecting anything the
+/// check accepts; see [`Rule`] for that invariant.
+fn built_in_refinements() -> Vec<(String, Refinement)> {
+    Vec::new()
 }
 
 struct Builder<'a> {
