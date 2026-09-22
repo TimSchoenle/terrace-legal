@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/TimSchoenle/terrace-legal/compare/v0.2.1...v0.3.0) (2026-09-22)
+
+
+### Features
+
+* **legal:** publish rule requirements into the configuration schema ([#16](https://github.com/TimSchoenle/terrace-legal/issues/16)) ([d22bae0](https://github.com/TimSchoenle/terrace-legal/commit/d22bae0268b79446bb836ef45e539bf2d347b70c))
+
 ## [0.2.1](https://github.com/TimSchoenle/terrace-legal/compare/v0.2.0...v0.2.1) (2026-09-21)
 
 
