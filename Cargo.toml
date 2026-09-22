@@ -23,7 +23,7 @@ terrace-legal-axum = { version = "0.2.1", path = "crates/terrace-legal-axum" } #
 terrace-legal-dioxus = { version = "0.2.1", path = "crates/terrace-legal-dioxus" } # x-release-please-version
 terrace-legal-markdown = { version = "0.2.1", path = "crates/terrace-legal-markdown" } # x-release-please-version
 
-terrace-config = { git = "https://github.com/TimSchoenle/terrace-config", tag = "v0.12.0", version = "0.12.0", default-features = false, features = ["loader", "schema"] }
+terrace-config = { git = "https://github.com/TimSchoenle/terrace-config", tag = "v0.13.0", version = "0.13.0", default-features = false, features = ["loader", "schema"] }
 
 axum = { version = "0.8.9", default-features = false, features = ["json", "query", "original-uri"] }
 base64 = "0.23.1"

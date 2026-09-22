@@ -300,8 +300,21 @@ mod consent {
             requirement: Requirement::None,
             version: None,
             effective: Some("garbage".into()),
-            grace_days: 999,
+            grace_days: 365,
         }));
+    }
+
+    /// The schema publishes the `grace_days` range for every requirement, so the check cannot
+    /// accept above it even where the value is unused.
+    #[test]
+    fn a_grace_period_is_at_most_a_year_even_when_off() {
+        let issues = refused(&with_policy(ConsentPolicy {
+            requirement: Requirement::None,
+            version: None,
+            effective: None,
+            grace_days: 366,
+        }));
+        assert_issue(&issues, &["documents.terms.consent.grace_days", "365"]);
     }
 
     #[test]
@@ -314,12 +327,50 @@ mod consent {
 
     #[test]
     fn effective_has_to_be_a_date() {
-        for bad in ["2026-13-01", "01.09.2026", "tomorrow", "2026-09", ""] {
+        for bad in [
+            "2026-13-01",
+            "2025-02-29",
+            "01.09.2026",
+            "tomorrow",
+            "2026-09",
+            "",
+        ] {
             let issues = refused(&with_policy(ConsentPolicy {
                 effective: Some(bad.into()),
                 ..policy(Requirement::Accept)
             }));
             assert_issue(&issues, &["documents.terms.consent.effective"]);
+        }
+    }
+
+    /// ISO 8601 has more date forms than the documented one, and a year may carry a sign or
+    /// more digits. Each is a valid date, but not one written as `YYYY-MM-DD`.
+    #[test]
+    fn effective_is_written_as_year_month_day() {
+        for other in [
+            "20260922",
+            "2026-265",
+            "2026-W39-2",
+            "+2026-09-22",
+            "-2026-09-22",
+            "+002026-09-22",
+            "2026-9-22",
+            "2026-09-22T00:00",
+        ] {
+            let issues = refused(&with_policy(ConsentPolicy {
+                effective: Some(other.into()),
+                ..policy(Requirement::Accept)
+            }));
+            assert_issue(
+                &issues,
+                &["documents.terms.consent.effective", "YYYY-MM-DD"],
+            );
+        }
+        for good in ["2026-09-22", "2024-02-29", " 2026-09-22\n"] {
+            catalog(&with_policy(ConsentPolicy {
+                effective: Some(good.into()),
+                ..policy(Requirement::Accept)
+            }));
         }
     }
 
@@ -357,6 +408,7 @@ mod consent {
 
 mod rules {
     use super::*;
+    use terrace_config::schema::{Refine, Refinement};
     use terrace_legal::{
         CatalogBuilder, ConfigIssue, Legal, LegalConfig, LegalDocument, RequiredDocuments, Rule,
     };
@@ -436,6 +488,76 @@ mod rules {
             legal.catalog().len(),
             1,
             "the previous catalog keeps serving"
+        );
+    }
+
+    /// A host's own rule that states its check in the schema, exactly as strict as the check.
+    struct ImprintRequired;
+
+    impl Rule for ImprintRequired {
+        fn check_config(&self, config: &LegalConfig) -> Vec<ConfigIssue> {
+            if config.documents.contains_key("imprint") {
+                Vec::new()
+            } else {
+                vec![ConfigIssue::new(["documents", "imprint"], "is required")]
+            }
+        }
+
+        fn refinements(&self) -> Vec<(String, Refinement)> {
+            vec![(
+                "documents".to_owned(),
+                Refinement::required_entries(["imprint"]),
+            )]
+        }
+    }
+
+    fn documents(slugs: &[&str]) -> (String, Refinement) {
+        (
+            "documents".to_owned(),
+            Refinement::required_entries(slugs.iter().copied()),
+        )
+    }
+
+    #[test]
+    fn required_documents_publishes_exactly_its_slugs_at_documents() {
+        let rule = RequiredDocuments::new(["terms", "privacy", "terms"]);
+        assert_eq!(rule.refinements(), [documents(&["privacy", "terms"])]);
+    }
+
+    #[test]
+    fn required_documents_without_slugs_still_names_its_key() {
+        assert_eq!(
+            RequiredDocuments::new(Vec::<String>::new()).refinements(),
+            [documents(&[])]
+        );
+    }
+
+    #[test]
+    fn a_rule_that_states_nothing_publishes_nothing() {
+        assert!(FooterRules.refinements().is_empty());
+        assert!(
+            CatalogBuilder::new()
+                .rule(FooterRules)
+                .refinements()
+                .is_empty(),
+            "neither the rule nor the built-in checks publish anything"
+        );
+    }
+
+    #[test]
+    fn the_builder_publishes_every_rules_refinements_in_registration_order() {
+        let builder = Catalog::builder()
+            .rule(RequiredDocuments::new(["terms"]))
+            .rule(FooterRules)
+            .rule(ImprintRequired)
+            .rule(RequiredDocuments::new(["privacy", "terms"]));
+        assert_eq!(
+            builder.refinements(),
+            [
+                documents(&["terms"]),
+                documents(&["imprint"]),
+                documents(&["privacy", "terms"]),
+            ]
         );
     }
 

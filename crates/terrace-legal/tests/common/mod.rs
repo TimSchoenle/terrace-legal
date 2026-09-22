@@ -6,6 +6,8 @@
 
 use terrace_legal::{Catalog, ConfigIssues, LegalConfig, LegalDocument};
 
+pub(crate) mod json_schema;
+
 /// A hosted document with one body per `(locale key, text)` pair.
 pub(crate) fn hosted(bodies: &[(&str, &str)]) -> LegalDocument {
     LegalDocument {

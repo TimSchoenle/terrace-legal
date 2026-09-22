@@ -216,11 +216,45 @@ order = 30
 `LegalConfig` and `LegalDocument` refuse a key they do not declare, so a misspelt `updatd` and a
 `consent` key in a build without the `consent` feature both fail at boot, by name.
 
+### Host rules in the published schema
+
+A host adds its own checks as `Rule`s on a `CatalogBuilder`. `RequiredDocuments` refuses a
+configuration without the named documents. A check that only runs at boot is invisible to
+whoever writes the configuration, so each rule also publishes what it checks into the host's
+schema, and the builder publishes all of them in one call. Paths are relative to the legal section,
+so the host names its mount point once and writes no other path:
+
+```rust
+use terrace_legal::{Catalog, CatalogBuilder, Legal, RequiredDocuments};
+
+/// One source for the published schema and the runtime check.
+fn legal_rules() -> CatalogBuilder {
+    Catalog::builder().rule(RequiredDocuments::new(["terms", "privacy"]))
+}
+
+// Where the schema or contract is generated:
+let schema = Terrace::new("APP_")
+    .schema::<Config>()
+    .with_defaults_from(&Config::default())?
+    .refine_with("legal", &legal_rules())?;
+// `legal.documents` now publishes `required: ["privacy", "terms"]`, is itself required, and no
+// longer advertises `{}` as a default.
+
+// Where the configuration is loaded:
+let builder = legal_rules();
+let catalog = builder.build(&config.legal).map_err(|issues| issues.with_prefix("legal"))?;
+let legal = Legal::with_builder(catalog, builder);
+```
+
+A published constraint is never stricter than the rule it comes from: every configuration the
+schema rejects, the rule rejects too. The schema may say less than the rule, never more. A custom
+rule implements `Rule::refinements` under the same invariant, or leaves the empty default.
+
 ## Compatibility
 
 | Library | axum | Dioxus | utoipa | terrace-config |
 | --- | --- | --- | --- | --- |
-| `{{ release.tag }}` | 0.8 | 0.7 | 5 | v0.12.0 |
+| `{{ release.tag }}` | 0.8 | 0.7 | 5 | v0.13.0 |
 
 | | Supported |
 | --- | --- |
