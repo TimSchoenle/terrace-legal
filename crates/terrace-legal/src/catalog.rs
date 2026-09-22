@@ -326,12 +326,13 @@ impl Refine for CatalogBuilder {
 ///   class of the Unicode `White_Space` characters `str::trim` removes: JSON Schema's `\S` also
 ///   treats U+FEFF as blank, which would reject text this check accepts.
 /// - Needing conditional or exclusive keywords the vocabulary lacks: exactly one of `body` and
-///   `url`, and with `consent` a `version`, a hosted `body` and, for a `grace_days` above zero,
-///   `effective`, each only for a requirement other than `none`.
+///   `url`, and with `consent` a `version`, a hosted `body`, and for a `grace_days` above zero,
+///   `effective`, each only for a requirement other than `none`. The `YYYY-MM-DD` syntax of
+///   `effective` is likewise checked only then, and stating it exactly also needs a regular
+///   expression that encodes month lengths and leap years and admits the whitespace `str::trim`
+///   removes.
 /// - Not expressible exactly in JSON Schema: two locale keys normalising to the same tag, a
-///   body's size in bytes (`maxLength` counts characters), URL parsing, and `effective`, which
-///   the parser accepts in every ISO 8601 date form (`20260922`, `2026-265`, `2026-W39-2`), so a
-///   `YYYY-MM-DD` pattern would reject valid dates.
+///   body's size in bytes (`maxLength` counts characters), and URL parsing.
 ///
 /// A refinement belongs here once the vocabulary can state a check without rejecting anything the
 /// check accepts; see [`Rule`] for that invariant.
@@ -571,9 +572,6 @@ impl Builder<'_> {
         source: &LegalDocument,
         bodies: Option<&BTreeMap<LocaleTag, (String, Digest)>>,
     ) -> Option<Policy> {
-        use time::Date;
-        use time::format_description::well_known::Iso8601;
-
         let config = &source.consent;
         let path = |field: &'static str| ["documents", key, "consent", field];
 
@@ -599,14 +597,14 @@ impl Builder<'_> {
             );
         }
         let effective = config.effective.as_deref().and_then(|text| {
-            Date::parse(text.trim(), &Iso8601::DATE)
-                .map_err(|_| {
-                    self.issue(
-                        path("effective"),
-                        format!("{text:?} is not a date; expected YYYY-MM-DD"),
-                    )
-                })
-                .ok()
+            let date = parse_calendar_date(text.trim());
+            if date.is_none() {
+                self.issue(
+                    path("effective"),
+                    format!("{text:?} is not a date; expected YYYY-MM-DD"),
+                );
+            }
+            date
         });
         if config.grace_days > 0 && config.effective.is_none() {
             self.issue(
@@ -630,4 +628,38 @@ impl Builder<'_> {
                 .unwrap_or_default(),
         })
     }
+}
+
+/// Parses a date written exactly as `YYYY-MM-DD`, the only form the configuration documents.
+///
+/// The format alone is not enough: a year component also takes a leading sign. The shape is
+/// therefore checked byte by byte first, and the parse only rejects impossible dates. The
+/// standard-range year keeps the format at four digits even when another crate in the build
+/// enables `time`'s `large-dates` feature.
+#[cfg(feature = "consent")]
+fn parse_calendar_date(text: &str) -> Option<time::Date> {
+    use time::format_description::{BorrowedFormatItem, Component, modifier};
+
+    const FORMAT: &[BorrowedFormatItem<'_>] = &[
+        BorrowedFormatItem::Component(Component::CalendarYearFullStandardRange(
+            modifier::CalendarYearFullStandardRange::default(),
+        )),
+        BorrowedFormatItem::StringLiteral("-"),
+        BorrowedFormatItem::Component(Component::MonthNumerical(
+            modifier::MonthNumerical::default(),
+        )),
+        BorrowedFormatItem::StringLiteral("-"),
+        BorrowedFormatItem::Component(Component::Day(modifier::Day::default())),
+    ];
+
+    let bytes = text.as_bytes();
+    let shaped = bytes.len() == 10
+        && bytes.iter().enumerate().all(|(index, byte)| match index {
+            4 | 7 => *byte == b'-',
+            _ => byte.is_ascii_digit(),
+        });
+    if !shaped {
+        return None;
+    }
+    time::Date::parse(text, FORMAT).ok()
 }
