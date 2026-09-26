@@ -43,7 +43,7 @@ tokio = "1.53.1"
 tokio-util = "0.7.19"
 tower = { version = "0.5.3", default-features = false }
 url = "2.5.8"
-utoipa = "5.5.0"
+utoipa = "6.0.0"
 
 [workspace.lints.rust]
 unsafe_code = "forbid"
