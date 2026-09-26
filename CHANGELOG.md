@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.1](https://github.com/TimSchoenle/terrace-legal/compare/v0.3.0...v0.3.1) (2026-09-26)
+
+
+### Miscellaneous
+
+* **deps:** update taiki-e/install-action action to v2.87.18 ([#19](https://github.com/TimSchoenle/terrace-legal/issues/19)) ([9944d72](https://github.com/TimSchoenle/terrace-legal/commit/9944d7265f1c2965b61a15a53c152d0f87d21247))
+* **deps:** update taiki-e/install-action action to v2.87.19 ([#22](https://github.com/TimSchoenle/terrace-legal/issues/22)) ([13eb466](https://github.com/TimSchoenle/terrace-legal/commit/13eb466777fc979cf9c7c63eb1ac3e53247cc263))
+
 ## [0.3.0](https://github.com/TimSchoenle/terrace-legal/compare/v0.2.1...v0.3.0) (2026-09-22)
 
 
