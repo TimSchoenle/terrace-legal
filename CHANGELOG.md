@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.3.1](https://github.com/TimSchoenle/terrace-legal/compare/v0.3.0...v0.3.1) (2026-10-02)
+
+
+### Miscellaneous
+
+* **deps:** update actions-rust-lang/setup-rust-toolchain action to v2 ([#13](https://github.com/TimSchoenle/terrace-legal/issues/13)) ([d0c3d0a](https://github.com/TimSchoenle/terrace-legal/commit/d0c3d0a80ba2f475d25e8e98636b1572e8a0bb37))
+* **deps:** update rust crate thiserror to v2.0.21 ([#24](https://github.com/TimSchoenle/terrace-legal/issues/24)) ([c2b272f](https://github.com/TimSchoenle/terrace-legal/commit/c2b272f8c21e748b297dbcec5cfe4ccbecb397d2))
+* **deps:** update rust crate utoipa to v6 ([#21](https://github.com/TimSchoenle/terrace-legal/issues/21)) ([0d6ad40](https://github.com/TimSchoenle/terrace-legal/commit/0d6ad40602ec1ec6657b03ac4fec262b591e387e))
+* **deps:** update taiki-e/install-action action to v2.87.18 ([#19](https://github.com/TimSchoenle/terrace-legal/issues/19)) ([9944d72](https://github.com/TimSchoenle/terrace-legal/commit/9944d7265f1c2965b61a15a53c152d0f87d21247))
+* **deps:** update taiki-e/install-action action to v2.87.19 ([#22](https://github.com/TimSchoenle/terrace-legal/issues/22)) ([13eb466](https://github.com/TimSchoenle/terrace-legal/commit/13eb466777fc979cf9c7c63eb1ac3e53247cc263))
+* **deps:** update taiki-e/install-action action to v2.87.20 ([#25](https://github.com/TimSchoenle/terrace-legal/issues/25)) ([3b45cad](https://github.com/TimSchoenle/terrace-legal/commit/3b45cad8d2020d374edd7d3577046ff9d0fcb1bb))
+* **deps:** update taiki-e/install-action action to v2.87.21 ([#28](https://github.com/TimSchoenle/terrace-legal/issues/28)) ([b54d5ab](https://github.com/TimSchoenle/terrace-legal/commit/b54d5ab06b12b1ef0afecd01f38f0dbcf65d641d))
+* **deps:** update taiki-e/install-action action to v2.87.22 ([#29](https://github.com/TimSchoenle/terrace-legal/issues/29)) ([9e3cada](https://github.com/TimSchoenle/terrace-legal/commit/9e3cadaa960fed12a18b84423902ec5feb0d710d))
+
+
+### Dependencies
+
+* **deps:** lock file maintenance ([#26](https://github.com/TimSchoenle/terrace-legal/issues/26)) ([da24608](https://github.com/TimSchoenle/terrace-legal/commit/da24608cbdd443b25d8dbb32b7ab56215329821d))
+* **deps:** lock file maintenance ([#27](https://github.com/TimSchoenle/terrace-legal/issues/27)) ([5599fc2](https://github.com/TimSchoenle/terrace-legal/commit/5599fc2dcaa012df96eeb944c5564fcfc2d12125))
+
 ## [0.3.0](https://github.com/TimSchoenle/terrace-legal/compare/v0.2.1...v0.3.0) (2026-09-22)
 
 
