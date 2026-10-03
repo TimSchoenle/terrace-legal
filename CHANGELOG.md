@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.3.2](https://github.com/TimSchoenle/terrace-legal/compare/v0.3.1...v0.3.2) (2026-10-03)
+
+
+### Miscellaneous
+
+* **deps:** update timschoenle/actions/actions/common/commit-changes to vactions-common-commit-changes-v1.5.3 ([#30](https://github.com/TimSchoenle/terrace-legal/issues/30)) ([96573fb](https://github.com/TimSchoenle/terrace-legal/commit/96573fb69ba9fc8a9b26f8554d79d907b96f7cf9))
+* **deps:** update timschoenle/actions/actions/common/readme-variables to vactions-common-readme-variables-v1.2.3 ([#31](https://github.com/TimSchoenle/terrace-legal/issues/31)) ([637f6a0](https://github.com/TimSchoenle/terrace-legal/commit/637f6a05148927909ec8839e357bbd33317119fb))
+* **deps:** update timschoenle/actions/actions/common/render-template to vactions-common-render-template-v1.2.3 ([#33](https://github.com/TimSchoenle/terrace-legal/issues/33)) ([350cde3](https://github.com/TimSchoenle/terrace-legal/commit/350cde3435a57ad26fd36d25d309189cc13041de))
+* **deps:** update timschoenle/actions/actions/rust/clippy to vactions-rust-clippy-v1.1.12 ([#34](https://github.com/TimSchoenle/terrace-legal/issues/34)) ([7cfa39b](https://github.com/TimSchoenle/terrace-legal/commit/7cfa39b85645646ce1c58699fcdca1e293bbeed7))
+
 ## [0.3.1](https://github.com/TimSchoenle/terrace-legal/compare/v0.3.0...v0.3.1) (2026-10-02)
 
 
