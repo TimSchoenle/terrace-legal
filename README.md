@@ -254,7 +254,7 @@ rule implements `Rule::refinements` under the same invariant, or leaves the empt
 
 | Library | axum | Dioxus | utoipa | terrace-config |
 | --- | --- | --- | --- | --- |
-| `v0.3.1` | 0.8 | 0.7 | 5 | v0.13.0 |
+| `v0.3.1` | 0.8 | 0.7 | 5 | v0.15.0 |
 
 | | Supported |
 | --- | --- |
