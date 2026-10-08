@@ -1,5 +1,36 @@
 # Changelog
 
+## [0.3.2](https://github.com/TimSchoenle/terrace-legal/compare/v0.3.1...v0.3.2) (2026-10-07)
+
+
+### Miscellaneous
+
+* **deps:** update rust crate terrace-config to v0.15.0 ([#23](https://github.com/TimSchoenle/terrace-legal/issues/23)) ([77588d0](https://github.com/TimSchoenle/terrace-legal/commit/77588d0f28fbc03cb694af26052257055aae74a9))
+* **deps:** update taiki-e/install-action action to v2.87.23 ([#43](https://github.com/TimSchoenle/terrace-legal/issues/43)) ([84975a9](https://github.com/TimSchoenle/terrace-legal/commit/84975a95f99423b5aa370d71dcaa5806ad81b4c0))
+* **deps:** update taiki-e/install-action action to v2.87.24 ([#50](https://github.com/TimSchoenle/terrace-legal/issues/50)) ([a6e41f0](https://github.com/TimSchoenle/terrace-legal/commit/a6e41f0b9574f06dcc41f2573924a4d7d9c7ae34))
+* **deps:** update timschoenle/actions/.github/workflows/maintenance-auto-approve-renovate.yaml to vworkflows-maintenance-auto-approve-renovate-v1.4.26 ([#35](https://github.com/TimSchoenle/terrace-legal/issues/35)) ([1ebafb7](https://github.com/TimSchoenle/terrace-legal/commit/1ebafb702d0bd9c365ddfad687991bd238e89517))
+* **deps:** update timschoenle/actions/.github/workflows/maintenance-auto-approve-renovate.yaml to vworkflows-maintenance-auto-approve-renovate-v1.4.27 ([#44](https://github.com/TimSchoenle/terrace-legal/issues/44)) ([e35b4da](https://github.com/TimSchoenle/terrace-legal/commit/e35b4dae350906da05c61303f034d71aa0b5b7d2))
+* **deps:** update timschoenle/actions/.github/workflows/maintenance-timed-auto-pr-approve.yaml to vworkflows-maintenance-timed-auto-pr-approve-v1.2.38 ([#36](https://github.com/TimSchoenle/terrace-legal/issues/36)) ([1750f46](https://github.com/TimSchoenle/terrace-legal/commit/1750f46d8913173b043d1115a04182cfd6fdb34c))
+* **deps:** update timschoenle/actions/.github/workflows/maintenance-timed-auto-pr-approve.yaml to vworkflows-maintenance-timed-auto-pr-approve-v1.2.39 ([#45](https://github.com/TimSchoenle/terrace-legal/issues/45)) ([8b123d9](https://github.com/TimSchoenle/terrace-legal/commit/8b123d995fc4f6fb31d99a23c99a5c0d04ee4213))
+* **deps:** update timschoenle/actions/actions/common/commit-changes to vactions-common-commit-changes-v1.5.3 ([#30](https://github.com/TimSchoenle/terrace-legal/issues/30)) ([96573fb](https://github.com/TimSchoenle/terrace-legal/commit/96573fb69ba9fc8a9b26f8554d79d907b96f7cf9))
+* **deps:** update timschoenle/actions/actions/common/commit-changes to vactions-common-commit-changes-v1.5.4 ([#37](https://github.com/TimSchoenle/terrace-legal/issues/37)) ([20847b8](https://github.com/TimSchoenle/terrace-legal/commit/20847b86d98584b55a64386e231b900578360f05))
+* **deps:** update timschoenle/actions/actions/common/commit-changes to vactions-common-commit-changes-v1.5.5 ([#46](https://github.com/TimSchoenle/terrace-legal/issues/46)) ([6f2e42e](https://github.com/TimSchoenle/terrace-legal/commit/6f2e42e6f1c388f5116455d9372b8105826b5700))
+* **deps:** update timschoenle/actions/actions/common/readme-variables to vactions-common-readme-variables-v1.2.3 ([#31](https://github.com/TimSchoenle/terrace-legal/issues/31)) ([637f6a0](https://github.com/TimSchoenle/terrace-legal/commit/637f6a05148927909ec8839e357bbd33317119fb))
+* **deps:** update timschoenle/actions/actions/common/readme-variables to vactions-common-readme-variables-v1.2.4 ([#38](https://github.com/TimSchoenle/terrace-legal/issues/38)) ([fbbc3bb](https://github.com/TimSchoenle/terrace-legal/commit/fbbc3bbcf6d71bae616779e73453a657da1167bf))
+* **deps:** update timschoenle/actions/actions/common/readme-variables to vactions-common-readme-variables-v1.2.5 ([#47](https://github.com/TimSchoenle/terrace-legal/issues/47)) ([ff923a4](https://github.com/TimSchoenle/terrace-legal/commit/ff923a416ab325fcd93665f5e246a5fcaa178a4d))
+* **deps:** update timschoenle/actions/actions/common/render-template to vactions-common-render-template-v1.2.3 ([#33](https://github.com/TimSchoenle/terrace-legal/issues/33)) ([350cde3](https://github.com/TimSchoenle/terrace-legal/commit/350cde3435a57ad26fd36d25d309189cc13041de))
+* **deps:** update timschoenle/actions/actions/common/render-template to vactions-common-render-template-v1.2.4 ([#39](https://github.com/TimSchoenle/terrace-legal/issues/39)) ([ff611da](https://github.com/TimSchoenle/terrace-legal/commit/ff611da93af662c75f559cbef83510a099fece3b))
+* **deps:** update timschoenle/actions/actions/common/render-template to vactions-common-render-template-v1.2.5 ([#48](https://github.com/TimSchoenle/terrace-legal/issues/48)) ([cf064f2](https://github.com/TimSchoenle/terrace-legal/commit/cf064f25ed74e753a7d1b73bf91c1b7ea0d2bc96))
+* **deps:** update timschoenle/actions/actions/common/render-template-and-commit to vactions-common-render-template-and-commit-v1.1.11 ([#40](https://github.com/TimSchoenle/terrace-legal/issues/40)) ([90efe43](https://github.com/TimSchoenle/terrace-legal/commit/90efe4324279ffbb6a19f776a80bbc997e27e71c))
+* **deps:** update timschoenle/actions/actions/common/render-template-and-commit to vactions-common-render-template-and-commit-v1.1.12 ([#49](https://github.com/TimSchoenle/terrace-legal/issues/49)) ([9e2f4f5](https://github.com/TimSchoenle/terrace-legal/commit/9e2f4f56332305a47563a67f46d67a2fdafe7f93))
+* **deps:** update timschoenle/actions/actions/rust/clippy to vactions-rust-clippy-v1.1.12 ([#34](https://github.com/TimSchoenle/terrace-legal/issues/34)) ([7cfa39b](https://github.com/TimSchoenle/terrace-legal/commit/7cfa39b85645646ce1c58699fcdca1e293bbeed7))
+
+
+### Dependencies
+
+* **deps:** lock file maintenance ([#41](https://github.com/TimSchoenle/terrace-legal/issues/41)) ([b4f9b87](https://github.com/TimSchoenle/terrace-legal/commit/b4f9b8707fb7f6cf2f7b9604df11d76459228653))
+* **deps:** lock file maintenance ([#42](https://github.com/TimSchoenle/terrace-legal/issues/42)) ([8e1f035](https://github.com/TimSchoenle/terrace-legal/commit/8e1f0352d6d1db5f21329d2577c6840214c0928b))
+
 ## [0.3.1](https://github.com/TimSchoenle/terrace-legal/compare/v0.3.0...v0.3.1) (2026-10-02)
 
 
