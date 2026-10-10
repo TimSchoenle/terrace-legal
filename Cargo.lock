@@ -1588,7 +1588,7 @@ dependencies = [
 
 [[package]]
 name = "terrace-legal"
-version = "0.3.2"
+version = "0.3.3"
 dependencies = [
  "base64",
  "proptest",
@@ -1606,7 +1606,7 @@ dependencies = [
 
 [[package]]
 name = "terrace-legal-axum"
-version = "0.3.2"
+version = "0.3.3"
 dependencies = [
  "axum",
  "http",
@@ -1623,7 +1623,7 @@ dependencies = [
 
 [[package]]
 name = "terrace-legal-dioxus"
-version = "0.3.2"
+version = "0.3.3"
 dependencies = [
  "dioxus",
  "dioxus-core",
@@ -1635,7 +1635,7 @@ dependencies = [
 
 [[package]]
 name = "terrace-legal-markdown"
-version = "0.3.2"
+version = "0.3.3"
 dependencies = [
  "dioxus",
  "dioxus-ssr",
@@ -1644,7 +1644,7 @@ dependencies = [
 
 [[package]]
 name = "terrace-legal-model"
-version = "0.3.2"
+version = "0.3.3"
 dependencies = [
  "proptest",
  "serde",
