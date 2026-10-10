@@ -5,10 +5,14 @@ CI renders it on every pull request and commits the result back to the branch. A
 whose README.md does not match its template fails the `readme` job in
 .github/workflows/docs.yml, which is a required check.
 
-The payload is collected by TimSchoenle/actions/actions/common/readme-variables, which reads
-Cargo.toml, merged over the output of one command:
+The payload is collected by TimSchoenle/actions/actions/common/readme-variables, merged over the
+output of one command:
 
     bash .github/scripts/readme-variables.sh
+
+The root Cargo.toml is a virtual workspace, which the action cannot read. The same script, run with
+`--emit-manifest .readme-manifest/Cargo.toml`, copies its `[workspace.package]` values into a
+one-package manifest, and the action reads that file.
 
 Every number this page quotes about itself — the tag its install snippets pin, the MSRV its badge
 shows, the licence its last section names — comes from that payload, so the release pull request
@@ -65,7 +69,6 @@ let legal = Legal::new(catalog);
 
 ## Table of contents
 
-- [Crates](#crates)
 - [Features](#features)
 - [Installation](#installation)
 - [Usage](#usage)
@@ -74,22 +77,6 @@ let legal = Legal::new(catalog);
 - [Contributing](#contributing)
 - [Security](#security)
 - [Licence](#licence)
-
-## Crates
-
-Every crate is versioned together and installed from one tag.
-
-| Crate | What it holds | Builds for `wasm32` |
-| --- | --- | --- |
-| `terrace-legal-model` | Wire types, locale negotiation, `Accept-Language` parsing, consent evaluation | Yes |
-| `terrace-legal` | `LegalConfig`, validation into a `Catalog`, digests and entity tags, the `Legal` handle, the consent store contract | No |
-| `terrace-legal-axum` | `ETag`, `304`, `Vary` and `Cache-Control` responders, an optional router, consent routes and a layer that enforces them | No |
-| `terrace-legal-dioxus` | A provider, hooks, link and page components, an acceptance sentence, a consent gate | Yes |
-| `terrace-legal-markdown` | Markdown to Dioxus elements with a link allowlist and no HTML string | Yes |
-
-Every edge of the dependency graph points at `terrace-legal-model`. `terrace-legal-dioxus` does not
-depend on `terrace-legal`, so the configuration loader never reaches a browser bundle. CI checks
-that with `cargo tree`.
 
 ## Features
 
@@ -111,6 +98,24 @@ that with `cargo tree`.
   `cargo test`.
 
 ## Installation
+
+### Crates
+
+Every crate is versioned together and installed from one tag.
+
+| Crate | What it holds | Builds for `wasm32` |
+| --- | --- | --- |
+| `terrace-legal-model` | Wire types, locale negotiation, `Accept-Language` parsing, consent evaluation | Yes |
+| `terrace-legal` | `LegalConfig`, validation into a `Catalog`, digests and entity tags, the `Legal` handle, the consent store contract | No |
+| `terrace-legal-axum` | `ETag`, `304`, `Vary` and `Cache-Control` responders, an optional router, consent routes and a layer that enforces them | No |
+| `terrace-legal-dioxus` | A provider, hooks, link and page components, an acceptance sentence, a consent gate | Yes |
+| `terrace-legal-markdown` | Markdown to Dioxus elements with a link allowlist and no HTML string | Yes |
+
+Every edge of the dependency graph points at `terrace-legal-model`. `terrace-legal-dioxus` does not
+depend on `terrace-legal`, so the configuration loader never reaches a browser bundle. CI checks
+that with `cargo tree`.
+
+### Git dependency
 
 ```toml
 [dependencies]
@@ -247,14 +252,14 @@ let legal = Legal::with_builder(catalog, builder);
 ```
 
 A published constraint is never stricter than the rule it comes from: every configuration the
-schema rejects, the rule rejects too. The schema may say less than the rule, never more. A custom
-rule implements `Rule::refinements` under the same invariant, or leaves the empty default.
+schema rejects, the rule rejects too. A custom rule implements `Rule::refinements` under the
+same invariant, or leaves the empty default.
 
 ## Compatibility
 
 | Library | axum | Dioxus | utoipa | terrace-config |
 | --- | --- | --- | --- | --- |
-| `{{ release.tag }}` | 0.8 | 0.7 | 5 | v0.15.0 |
+| `{{ release.tag }}` | 0.8 | 0.7 | 6 | v0.15.1 |
 
 | | Supported |
 | --- | --- |
