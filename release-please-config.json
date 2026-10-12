@@ -4,6 +4,7 @@
   "include-component-in-tag": false,
   "packages": {
     ".": {
+      "exclude-paths": [".github"],
       "package-name": "terrace-legal",
       "changelog-path": "CHANGELOG.md",
       "draft": false,
@@ -41,8 +42,7 @@
     },
     {
       "type": "refactor",
-      "section": "Code Refactoring",
-      "hidden": false
+      "section": "Code Refactoring"
     },
     {
       "type": "test",
@@ -52,7 +52,7 @@
     {
       "type": "style",
       "section": "Styles",
-      "hidden": false
+      "hidden": true
     },
     {
       "type": "ci",
@@ -61,18 +61,16 @@
     },
     {
       "type": "build",
-      "section": "Build System",
-      "hidden": false
+      "section": "Build System"
     },
     {
       "type": "chore",
       "section": "Miscellaneous",
-      "hidden": false
+      "hidden": true
     },
     {
       "type": "deps",
-      "section": "Dependencies",
-      "hidden": false
+      "section": "Dependencies"
     }
   ]
 }
