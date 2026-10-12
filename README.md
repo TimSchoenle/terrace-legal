@@ -27,6 +27,7 @@ Operator-configured legal documents: configuration, validation, HTTP serving and
 
 [![Release](https://img.shields.io/github/v/release/TimSchoenle/terrace-legal?sort=semver)](https://github.com/TimSchoenle/terrace-legal/releases)
 [![CI](https://img.shields.io/github/actions/workflow/status/TimSchoenle/terrace-legal/ci.yml?branch=main&label=ci)](https://github.com/TimSchoenle/terrace-legal/actions/workflows/ci.yml)
+[![Codecov](https://codecov.io/gh/TimSchoenle/terrace-legal/graph/badge.svg)](https://codecov.io/gh/TimSchoenle/terrace-legal)
 [![Licence](https://img.shields.io/github/license/TimSchoenle/terrace-legal)](LICENSE)
 [![MSRV](https://img.shields.io/badge/MSRV-1.94-blue)](Cargo.toml)
 
