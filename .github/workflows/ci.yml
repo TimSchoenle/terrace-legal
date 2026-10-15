@@ -131,7 +131,7 @@ jobs:
         uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
         with:
           egress-policy: audit
-      - uses: TimSchoenle/actions/actions/rust/coverage-codecov@3dc15ee0f2fbacdc1741a20bc0e8ad1011b989c7 # tag=actions-rust-coverage-codecov-v2.0.0
+      - uses: TimSchoenle/actions/actions/rust/coverage-codecov@f33849da61e2397d3a9277762d09a1bf0d2b9d7c # tag=actions-rust-coverage-codecov-v2.0.1
         with:
           # The arguments `test` uses. The consent-off build is not measured: Codecov takes one
           # upload per commit.
