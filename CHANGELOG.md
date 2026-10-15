@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.3.3](https://github.com/TimSchoenle/terrace-legal/compare/v0.3.2...v0.3.3) (2026-10-15)
+
+
+### Dependencies
+
+* **deps:** update rust crate proptest to v1.12.0 ([#74](https://github.com/TimSchoenle/terrace-legal/issues/74)) ([3e3af06](https://github.com/TimSchoenle/terrace-legal/commit/3e3af061d126e56f515d3919d929f0a92d312b43))
+* **deps:** update rust crate serde_json to v1.0.152 ([#72](https://github.com/TimSchoenle/terrace-legal/issues/72)) ([4e8409b](https://github.com/TimSchoenle/terrace-legal/commit/4e8409b906ef624a62ef3a6ae5ea87e6c5abef02))
+* **deps:** update rust crate serde_json to v1.0.152 ([#73](https://github.com/TimSchoenle/terrace-legal/issues/73)) ([17800e5](https://github.com/TimSchoenle/terrace-legal/commit/17800e555021ebaa0c47cae1038f8216761286a0))
+* **deps:** update rust crate serde_json to v1.0.153 ([#75](https://github.com/TimSchoenle/terrace-legal/issues/75)) ([bedcbfd](https://github.com/TimSchoenle/terrace-legal/commit/bedcbfda4fe5303120c138f5e3d0a6a8367325c2))
+* **deps:** update rust crate serde_json to v1.0.153 ([#76](https://github.com/TimSchoenle/terrace-legal/issues/76)) ([8608c29](https://github.com/TimSchoenle/terrace-legal/commit/8608c29883ed2517ec0714f4cc7825dba29e171e))
+* **deps:** update rust crate serde_json to v1.0.154 ([#77](https://github.com/TimSchoenle/terrace-legal/issues/77)) ([d4edbaa](https://github.com/TimSchoenle/terrace-legal/commit/d4edbaae3c5016726265774d97d31c6d172a2717))
+* **deps:** update rust crate sha2 to v0.11.1 ([#80](https://github.com/TimSchoenle/terrace-legal/issues/80)) ([626e423](https://github.com/TimSchoenle/terrace-legal/commit/626e423e8d6d39455eabceab95ac48bdc19c957f))
+* **deps:** update rust crate tokio-util to v0.7.20 ([#68](https://github.com/TimSchoenle/terrace-legal/issues/68)) ([c9cbf13](https://github.com/TimSchoenle/terrace-legal/commit/c9cbf13f784bd3030151774ac2a4d780ba8c7c34))
+
 ## [0.3.2](https://github.com/TimSchoenle/terrace-legal/compare/v0.3.1...v0.3.2) (2026-10-07)
 
 
