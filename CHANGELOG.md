@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.4](https://github.com/TimSchoenle/terrace-legal/compare/v0.3.3...v0.3.4) (2026-10-17)
+
+
+### Dependencies
+
+* **deps:** update rust crate tokio to v1.53.3 ([#82](https://github.com/TimSchoenle/terrace-legal/issues/82)) ([c33c5d3](https://github.com/TimSchoenle/terrace-legal/commit/c33c5d30d34d2d8fd6780b7c74ec50ce2ea291a6))
+
 ## [0.3.3](https://github.com/TimSchoenle/terrace-legal/compare/v0.3.2...v0.3.3) (2026-10-15)
 
 
