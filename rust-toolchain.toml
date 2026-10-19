@@ -1,0 +1,19 @@
+# The compiler this repository is developed and checked with: local `cargo` and every CI job that
+# does not name a toolchain of its own. It does not reach anyone depending on these crates; what
+# they need is `rust-version` in Cargo.toml.
+#
+# Pinned to an exact release rather than `stable` so that a new Rust, with its new clippy lints
+# and rustfmt output, arrives as a reviewed Renovate pull request instead of turning an unrelated
+# pull request red on the day it ships.
+#
+# Two kinds of job deliberately run something else. `msrv` installs the `rust-version` floor and
+# the fuzz job installs nightly, both through the action's `toolchain` input, whose
+# `rustup override` takes precedence over this file. `fuzz/` carries a nightly pin of its own,
+# which wins for anything run inside that directory.
+[toolchain]
+channel = "1.99.1"
+# What the `fmt` and `clippy` jobs run.
+components = ["rustfmt", "clippy"]
+# No `targets`: `wasm32-unknown-unknown` is only needed by the two jobs that prove the Dioxus
+# adapter builds for the browser, and each adds it itself.
+profile = "minimal"
