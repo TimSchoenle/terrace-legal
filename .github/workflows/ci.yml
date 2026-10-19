@@ -322,6 +322,10 @@ jobs:
           set -euo pipefail
           smoke="$(mktemp -d)/smoke"
           cargo new --lib "${smoke}"
+          # The consumer lives outside the checkout, where rustup would fall back to the runner's
+          # default toolchain, which has no wasm32 target. Giving it the repository's pin builds it
+          # with the toolchain installed above.
+          cp rust-toolchain.toml "${smoke}/"
           cd "${smoke}"
           cargo add "${PACKAGE}" --git "file://${GITHUB_WORKSPACE}"
           cargo build
