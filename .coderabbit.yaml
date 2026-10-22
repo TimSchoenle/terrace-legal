@@ -1,0 +1,92 @@
+# yaml-language-server: $schema=https://storage.googleapis.com/coderabbit_public_assets/schema.v2.json
+tone_instructions: "Direct, no filler, no praise."
+
+reviews:
+  profile: assertive
+
+  auto_review:
+    # CodeRabbit cannot filter by head branch, so automated pull requests are
+    # skipped by author: Renovate opens `renovate/*`, the release manager app
+    # opens `release-please--*`. Both the bot login and the bare app slug are
+    # listed because the match is exact.
+    ignore_usernames:
+      - "renovate[bot]"
+      - "renovate"
+      - "automatic-release-manager[bot]"
+      - "automatic-release-manager"
+
+  # Generated or tool-owned files. Review their sources instead.
+  path_filters:
+    - "!**/Cargo.lock"
+    - "!target/**"
+    - "!CHANGELOG.md"
+    - "!.release-please-manifest.json"
+    - "!README.md" # rendered from .github/templates/README.md.hbs
+
+  path_instructions:
+    - path: "crates/**/*.rs"
+      instructions: |
+        Published library crates following semver. Flag:
+        - Changes to public items (signatures, trait bounds, struct fields, enum variants,
+          feature flags) that break semver; new public enums/structs should be `#[non_exhaustive]`
+          where future growth is plausible.
+        - `unwrap`, `expect`, `panic!`, `unreachable!` or indexing that can panic in non-test code;
+          fallible paths must return typed errors, and any remaining panic needs a `# Panics` doc.
+        - Missing `# Errors` / `# Panics` sections and rustdoc on public items.
+        - Bare `#[allow(...)]`; the workspace requires `#[expect(..., reason = "...")]`.
+        - New dependencies or features: justify them and keep default features minimal.
+        - Code that would not compile on the MSRV declared in Cargo.toml (`rust-version`).
+        `unsafe_code` is forbidden workspace-wide; do not suggest `unsafe`.
+    - path: "crates/terrace-legal-markdown/**"
+      instructions: |
+        Renders Markdown that may originate from untrusted input. Scrutinise HTML escaping,
+        raw HTML passthrough, link/URL schemes (javascript:, data:), and unbounded recursion or
+        allocation that could be abused for denial of service.
+    - path: "crates/terrace-legal-axum/**"
+      instructions: |
+        HTTP integration layer. Check status codes, content types, cache headers, error-to-response
+        mapping that must not leak internals, and that handlers do no blocking work on the async runtime.
+    - path: "crates/terrace-legal-dioxus/**"
+      instructions: |
+        UI integration layer. Check that rendered content is escaped, components stay free of
+        business logic that belongs in the core crates, and feature gating is correct.
+    - path: "fuzz/**"
+      instructions: |
+        Test-only fuzz harness on nightly. Do not apply library API or documentation rules; focus on
+        whether the targets exercise meaningful input space and avoid trivially rejected inputs.
+    - path: ".github/workflows/**"
+      instructions: |
+        Every third-party action must be pinned to a full commit SHA with a version comment.
+        Require least-privilege `permissions:` at workflow or job level, `persist-credentials: false`
+        on checkout unless pushing, no untrusted `${{ github.event.* }}` interpolation into `run:`,
+        and no `pull_request_target` that checks out or executes PR code.
+    - path: ".github/templates/**"
+      instructions: |
+        Source of the generated README.md. Review rendered wording, links and badge URLs here.
+    - path: "**/*.sh"
+      instructions: |
+        Require `set -euo pipefail`, quoted expansions, and no reliance on GNU-only flags
+        without a comment.
+
+  pre_merge_checks:
+    title:
+      mode: error
+      requirements: |
+        Must follow Conventional Commits: `type(scope)?!?: subject`. Allowed types: feat, fix, perf,
+        revert, docs, refactor, test, style, ci, build, chore, deps. Lowercase, imperative subject,
+        no trailing period. release-please derives version bumps and the changelog from this title.
+
+  tools:
+    # Already enforced in CI across the full feature matrix; duplicating it adds noise.
+    clippy:
+      enabled: false
+    actionlint:
+      enabled: true
+    zizmor:
+      enabled: true
+    gitleaks:
+      enabled: true
+    shellcheck:
+      enabled: true
+    markdownlint:
+      enabled: true
