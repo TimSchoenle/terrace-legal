@@ -259,7 +259,7 @@ same invariant, or leaves the empty default.
 
 | Library | axum | Dioxus | utoipa | terrace-config |
 | --- | --- | --- | --- | --- |
-| `v0.3.3` | 0.8 | 0.7 | 6 | v0.15.1 |
+| `v0.3.3` | 0.8 | 0.7 | 6 | v0.17.0 |
 
 | | Supported |
 | --- | --- |
