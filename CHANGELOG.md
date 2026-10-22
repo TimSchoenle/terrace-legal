@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.3.4](https://github.com/TimSchoenle/terrace-legal/compare/v0.3.3...v0.3.4) (2026-10-22)
+
+
+### Build System
+
+* **renovate:** extend the shared rust-toolchain preset ([#90](https://github.com/TimSchoenle/terrace-legal/issues/90)) ([2b26dfd](https://github.com/TimSchoenle/terrace-legal/commit/2b26dfd3ba3f46920d3c5f2bb20a56a5fd31d848))
+
+
+### Dependencies
+
+* **deps:** lock file maintenance ([#86](https://github.com/TimSchoenle/terrace-legal/issues/86)) ([52eb7a4](https://github.com/TimSchoenle/terrace-legal/commit/52eb7a464500d51b6bdd5d9a58e8d4676a406a2a))
+* **deps:** lock file maintenance ([#87](https://github.com/TimSchoenle/terrace-legal/issues/87)) ([2818d5e](https://github.com/TimSchoenle/terrace-legal/commit/2818d5ea0a5aee583441d033b06d6494e0422a6a))
+* **deps:** update rust crate pulldown-cmark to v0.13.5 ([#92](https://github.com/TimSchoenle/terrace-legal/issues/92)) ([a3b6c82](https://github.com/TimSchoenle/terrace-legal/commit/a3b6c8287f376e15bd83824753739eaa7fde8816))
+* **deps:** update rust crate terrace-config to v0.15.2 ([#85](https://github.com/TimSchoenle/terrace-legal/issues/85)) ([5194feb](https://github.com/TimSchoenle/terrace-legal/commit/5194febe3d25f60e1d2e5e6159241cac24980c1d))
+* **deps:** update rust crate terrace-config to v0.17.0 ([#95](https://github.com/TimSchoenle/terrace-legal/issues/95)) ([22de879](https://github.com/TimSchoenle/terrace-legal/commit/22de879d4f3a40993f8dc81638758300f03ba302))
+* **deps:** update rust crate tokio to v1.53.3 ([#82](https://github.com/TimSchoenle/terrace-legal/issues/82)) ([c33c5d3](https://github.com/TimSchoenle/terrace-legal/commit/c33c5d30d34d2d8fd6780b7c74ec50ce2ea291a6))
+* **deps:** update rust crate tokio to v1.54.1 ([#94](https://github.com/TimSchoenle/terrace-legal/issues/94)) ([fc25509](https://github.com/TimSchoenle/terrace-legal/commit/fc2550962a5c927f2ca285525679bec21263e08e))
+
 ## [0.3.3](https://github.com/TimSchoenle/terrace-legal/compare/v0.3.2...v0.3.3) (2026-10-15)
 
 
