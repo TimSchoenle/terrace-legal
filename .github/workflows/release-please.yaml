@@ -35,10 +35,9 @@ jobs:
       deployment: false
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    permissions:
-      contents: write # to create the release commit, the tag and the GitHub release
-      issues: write # to comment on the issues a release closes
-      pull-requests: write # to open and maintain the release pull request
+    # Nothing for `GITHUB_TOKEN`: every write below — the release commit, the tags, the GitHub
+    # releases and the release pull request — is made with the App token minted in this job.
+    permissions: {}
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
