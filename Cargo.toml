@@ -23,10 +23,7 @@ terrace-legal-axum = { version = "0.3.5", path = "crates/terrace-legal-axum" } #
 terrace-legal-dioxus = { version = "0.3.5", path = "crates/terrace-legal-dioxus" } # x-release-please-version
 terrace-legal-markdown = { version = "0.3.5", path = "crates/terrace-legal-markdown" } # x-release-please-version
 
-# Renovate updates `tag` and `version` together through the `terrace-config` custom manager in
-# renovate.json, which matches this exact field order: keep `git`, `tag`, `version` first and in
-# this order. `version` stays: cargo-deny rejects a git dependency without one as a wildcard.
-terrace-config = { git = "https://github.com/TimSchoenle/terrace-config", tag = "v0.18.0", version = "0.18.0", default-features = false, features = ["loader", "schema"] }
+terrace-config = { git = "https://github.com/TimSchoenle/terrace-config", tag = "v0.18.0", default-features = false, features = ["loader", "schema"] }
 
 axum = { version = "0.8.9", default-features = false, features = ["json", "query", "original-uri"] }
 base64 = "0.23.1"

@@ -5,24 +5,6 @@
     "github>TimSchoenle/actions//configs/renovate/rust-toolchain",
     "customManagers:githubActionsVersions"
   ],
-  "customManagers": [
-    {
-      "customType": "regex",
-      "description": "terrace-config in the workspace manifest: rewrites `tag` and `version` in one replacement. The match is anchored on the field order of that line, which the comment above it in Cargo.toml pins. Uses the same datasource and packageName as the cargo manager, so the shared `terrace` group and its release notes still apply.",
-      "managerFilePatterns": [
-        "/^Cargo\\.toml$/"
-      ],
-      "matchStrings": [
-        "terrace-config = \\{ git = \"https://github\\.com/TimSchoenle/terrace-config\", tag = \"v(?<currentValue>\\d+\\.\\d+\\.\\d+)\", version = \"\\d+\\.\\d+\\.\\d+\""
-      ],
-      "depNameTemplate": "terrace-config",
-      "packageNameTemplate": "TimSchoenle/terrace-config",
-      "datasourceTemplate": "github-tags",
-      "versioningTemplate": "semver",
-      "extractVersionTemplate": "^v(?<version>\\d+\\.\\d+\\.\\d+)$",
-      "autoReplaceStringTemplate": "terrace-config = { git = \"https://github.com/TimSchoenle/terrace-config\", tag = \"v{{{newValue}}}\", version = \"{{{newValue}}}\""
-    }
-  ],
   "packageRules": [
     {
       "description": "The MSRV is a compatibility promise, not a dependency: `rust-version` in Cargo.toml, the MSRV badge rendered into the README and the `msrv` CI job move together, as a decision.",
@@ -79,26 +61,6 @@
         "utoipa-*"
       ],
       "groupName": "utoipa"
-    },
-    {
-      "description": "terrace-config is a git dependency whose `tag` and `version` must move together: `version` is not redundant, because cargo-deny bans a git dependency without one as a wildcard. The cargo manager only ever rewrites `tag`, which leaves `version` behind and breaks resolution, so the cargo manager is turned off for this dependency and the `terrace-config` custom manager updates both fields instead.",
-      "matchManagers": [
-        "cargo"
-      ],
-      "matchDepNames": [
-        "terrace-config"
-      ],
-      "enabled": false
-    },
-    {
-      "description": "Keeps the custom manager's pull requests titled like the cargo manager's: `update rust crate terrace-config`.",
-      "matchManagers": [
-        "custom.regex"
-      ],
-      "matchDepNames": [
-        "terrace-config"
-      ],
-      "commitMessageTopic": "rust crate terrace-config"
     }
   ]
 }
