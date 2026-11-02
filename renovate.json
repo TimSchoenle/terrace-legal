@@ -61,16 +61,6 @@
         "utoipa-*"
       ],
       "groupName": "utoipa"
-    },
-    {
-      "description": "terrace-config is a git dependency pinned by tag; the tag moves on its own.",
-      "matchManagers": [
-        "cargo"
-      ],
-      "matchPackageNames": [
-        "terrace-config"
-      ],
-      "groupName": "terrace-config"
     }
   ]
 }
