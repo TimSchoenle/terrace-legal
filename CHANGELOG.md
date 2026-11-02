@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.7](https://github.com/TimSchoenle/terrace-legal/compare/v0.3.6...v0.3.7) (2026-11-02)
+
+
+### Dependencies
+
+* **deps:** update rust crate terrace-config to v0.18.1 ([#113](https://github.com/TimSchoenle/terrace-legal/issues/113)) ([0d8a284](https://github.com/TimSchoenle/terrace-legal/commit/0d8a2847ac303d200f97bac598fe1e5182b4961a))
+
 ## [0.3.6](https://github.com/TimSchoenle/terrace-legal/compare/v0.3.5...v0.3.6) (2026-11-02)
 
 
