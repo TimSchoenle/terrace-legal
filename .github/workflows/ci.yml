@@ -271,6 +271,7 @@ jobs:
         run: cargo doc --lib --no-deps
       - name: Short campaign
         run: |
+          set -o pipefail
           host="$(rustc -vV | sed -n 's/^host: //p')"
           for target in accept_language locale_tag config_load markdown; do
             # The markdown target renders through a Dioxus VirtualDom, which keeps a fixed
