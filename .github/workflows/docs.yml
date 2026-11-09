@@ -1,18 +1,11 @@
 name: docs
 
-# `README.md` is generated from `.github/templates/README.md.hbs`. This workflow is what makes
-# that claim true in both directions.
+# `README.md` is generated from `.github/templates/README.md.hbs`. On a pull request the `render`
+# job in generate.yaml renders it and generate-commit.yaml commits the result, so nothing the
+# README quotes about itself is edited by hand.
 #
-# On a pull request it renders the template and commits the result to the branch, so nothing the
-# README quotes about itself is edited by hand: the tag its install snippets pin, the MSRV its
-# badge shows, the licence its last section names, and the table of everything under `docs/`.
-# The case that matters is the release-please pull request: that
-# commit is the one which changes `version` in `Cargo.toml`, so it is also the one where the
-# README would otherwise start advertising the previous tag. Rendering here means the released
-# README already points at the tag the merge is about to create.
-#
-# Everywhere it cannot commit — a push to `main`, a pull request from a fork — it renders in
-# `check` mode instead, writing nothing and failing if the committed `README.md` is stale.
+# Everywhere nothing commits — a push to `main`, a pull request from a fork — this workflow renders
+# in `check` mode instead, writing nothing and failing if the committed `README.md` is stale.
 # Without it, editing `README.md` directly would appear to work right up until the next pull
 # request silently reverted it.
 
@@ -21,8 +14,6 @@ on:
   push:
     branches: [main]
 
-# A newer push supersedes the run on the older head. Nothing here writes to the branch: the
-# commit happens in docs-commit.yml, which queues with the other writers to this branch.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -30,97 +21,10 @@ concurrency:
 permissions: {}
 
 jobs:
-  # `render` and `render-commit` in docs-commit.yml (a workflow_run workflow the pull request cannot
-  # edit) are two halves, and the split is the security boundary of this workflow. `render` runs the
-  # pull request's own script and templates, so it holds no secret and a read-only `GITHUB_TOKEN`,
-  # and hands on only a patch artifact. `render-commit` in docs-commit.yml holds the maintenance
-  # App's private key and the write token minted from it, runs nothing from the checkout, and
-  # `allowed_paths` refuses any path other than `README.md`.
-  render:
-    name: render
-    # A fork's branch is not in this repository, so there would be nothing to commit to.
-    # `check` below picks those pull requests up instead.
-    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    permissions:
-      contents: read # to fetch code
-    steps:
-      - name: Harden Runner
-        uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
-        with:
-          egress-policy: audit
-
-      # The head of the branch, not the merge commit: the render has to read the `Cargo.toml`
-      # the pull request proposes, and the patch has to apply on top of the commit the branch
-      # points at, which is the one `commit-patch` checks it against.
-      - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-          persist-credentials: false
-
-      # Invoked through `bash` rather than executed: the repository is authored on Windows, where
-      # git does not record the executable bit.
-      - name: Generate the configuration payload
-        id: config
-        run: |
-          set -euo pipefail
-          json="$(bash .github/scripts/readme-variables.sh)"
-          echo "json=${json}" >> "$GITHUB_OUTPUT"
-          # The root manifest is a virtual workspace, which the action cannot read a version from.
-          bash .github/scripts/readme-variables.sh --emit-manifest .readme-manifest/Cargo.toml
-
-      # `branch` is the default branch rather than the action's `github.ref_name` default, which
-      # on a pull_request event is `<number>/merge`. Left alone, the badge URL rendered here and
-      # the one rendered by `check` on `main` differ, and the gate fails on every merge for a
-      # reason absent from the diff.
-      - name: Collect the README payload
-        id: variables
-        uses: TimSchoenle/actions/actions/common/readme-variables@dc5b395636dc1954383f11af4062a08814e9b15a # tag=actions-common-readme-variables-v2.1.1
-        with:
-          branch: ${{ github.event.repository.default_branch }}
-          manifest: .readme-manifest/Cargo.toml
-          extra: ${{ steps.config.outputs.json }}
-
-      - name: Render the README
-        id: readme
-        uses: TimSchoenle/actions/actions/common/render-template@dc5b395636dc1954383f11af4062a08814e9b15a # tag=actions-common-render-template-v3.0.1
-        with:
-          template: .github/templates/README.md.hbs
-          output: README.md
-          variables: ${{ steps.variables.outputs.variables }}
-
-      - name: Create Patch
-        id: patch
-        uses: TimSchoenle/actions/actions/common/create-patch@dc5b395636dc1954383f11af4062a08814e9b15a # tag=actions-common-create-patch-v1.1.1
-        with:
-          artifact_name: docs-readme
-          paths: 'README.md'
-
-      - name: Summarise
-        env:
-          CHANGED: ${{ steps.readme.outputs.changed }}
-        run: |
-          if [ "${CHANGED}" = "true" ]; then
-            echo "README.md re-rendered; docs-commit.yml commits it." >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "README.md already matched its template." >> "$GITHUB_STEP_SUMMARY"
-          fi
-
-      # The patch is committed by docs-commit.yml after this run has finished. While it is
-      # non-empty this head is not the one to merge: the run on the bot commit decides.
-      - name: Fail while the patch is uncommitted
-        if: steps.patch.outputs.has_changes == 'true'
-        run: |
-          echo "::error::README.md changed; docs-commit.yml commits the patch and the run on that commit decides. If no bot commit appears, regenerate the files locally and push."
-          exit 1
-
   check:
     name: readme
-    # The complement of `render`: it covers the pushes to `main` that no pull request rendered,
-    # and the fork pull requests that could not be committed to. Between the two conditions every
-    # event this workflow sees is handled by exactly one job.
+    # The complement of the `render` job in generate.yaml: it covers the pushes to `main` that no
+    # pull request rendered, and the fork pull requests that could not be committed to.
     if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
     runs-on: ubuntu-latest
     timeout-minutes: 10
