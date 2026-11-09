@@ -2,9 +2,9 @@
 #
 # Emits this repository's half of the README render payload as strict JSON on stdout.
 #
-# It is the `extra` input of the `readme-variables` action in docs.yml, deep-merged over what that
-# action derives. The keys below are top-level and so collide with nothing it emits, which sits
-# under `repo`, `release`, `toolchain` and `docs`.
+# It is the `extra` input of the `readme-variables` action in generate.yaml and docs.yml,
+# deep-merged over what that action derives. The keys below are top-level and so collide with
+# nothing it emits, which sits under `repo`, `release`, `toolchain` and `docs`.
 #
 # `Cargo.toml` is the single source of truth for both numbers the README quotes: the tag its
 # install snippet pins, and the MSRV its badge advertises. The action reads both from the same

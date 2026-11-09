@@ -8,9 +8,9 @@ name: release-please
 # that tag is the artefact: nothing is published to crates.io, and a consumer pins it as a git
 # dependency. The version lines in `Cargo.toml` carry an `x-release-please-version` marker
 # because the root manifest is a virtual workspace, which release-please's `rust` updater does not
-# read. `update-files.yaml` refreshes `Cargo.lock` on the release pull request afterwards.
+# read. `generate.yaml` refreshes `Cargo.lock` on the release pull request afterwards.
 #
-# The version the README advertises is not maintained here. `docs.yml` re-renders
+# The version the README advertises is not maintained here. `generate.yaml` re-renders
 # `.github/templates/README.md.hbs` on every pull request from the version in `Cargo.toml`, so the
 # release pull request carries the updated `README.md` with it.
 
