@@ -329,6 +329,9 @@ jobs:
           cp rust-toolchain.toml "${smoke}/"
           cd "${smoke}"
           cargo add "${PACKAGE}" --git "file://${GITHUB_WORKSPACE}"
+          # Name the crate from the code, or Cargo reports the dependency as unused, which the
+          # denied warnings turn into a failed build. Linking it is all this job asserts.
+          printf 'use %s as _;\n' "${PACKAGE//-/_}" > src/lib.rs
           cargo build
           case "${PACKAGE}" in
             terrace-legal-model | terrace-legal-dioxus | terrace-legal-markdown)
