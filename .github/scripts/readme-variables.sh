@@ -19,9 +19,10 @@
 # With `--emit-manifest <path>` it instead writes a one-package manifest to <path> and prints
 # nothing. The `readme-variables` action reads a `[package]` table with literal values, and this
 # repository has neither: the root is a virtual workspace and its members inherit every field with
-# `version.workspace = true`. The emitted file carries the `[workspace.package]` values in the
-# shape the action reads, so `Cargo.toml` stays the only place they are written down. The action picks its parser by the
-# file's basename, so <path> has to end in `Cargo.toml`.
+# `version.workspace = true`. The emitted file carries the `[workspace.package]` values, plus the
+# description from `[workspace.metadata.readme]`, in the shape the action reads, so `Cargo.toml`
+# stays the only place they are written down. The action picks its parser by the file's basename,
+# so <path> has to end in `Cargo.toml`.
 #
 # Deliberately POSIX tools only, no `jq`: it is not present in a default Git for Windows shell,
 # and a script that only runs on the CI runner is a script nobody checks their edit against.
