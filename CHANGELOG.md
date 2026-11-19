@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.3.8](https://github.com/TimSchoenle/terrace-legal/compare/v0.3.7...v0.3.8) (2026-11-19)
+
+
+### Dependencies
+
+* **deps:** lock file maintenance ([#133](https://github.com/TimSchoenle/terrace-legal/issues/133)) ([ba33539](https://github.com/TimSchoenle/terrace-legal/commit/ba335394c204d8b512f457bd39a584aacff8456c))
+* **deps:** lock file maintenance ([#134](https://github.com/TimSchoenle/terrace-legal/issues/134)) ([f0a7ebb](https://github.com/TimSchoenle/terrace-legal/commit/f0a7ebb5ed3ae0657d362afd45dfd4d1bcf4d38b))
+* **deps:** update rust to v1.100.0 ([#131](https://github.com/TimSchoenle/terrace-legal/issues/131)) ([c2ea12a](https://github.com/TimSchoenle/terrace-legal/commit/c2ea12a151051cd0036d560938c6a14c112e6abf))
+
 ## [0.3.7](https://github.com/TimSchoenle/terrace-legal/compare/v0.3.6...v0.3.7) (2026-11-02)
 
 
