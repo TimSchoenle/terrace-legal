@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.3.8](https://github.com/TimSchoenle/terrace-legal/compare/v0.3.7...v0.3.8) (2026-11-23)
+
+
+### Dependencies
+
+* **deps:** lock file maintenance ([#133](https://github.com/TimSchoenle/terrace-legal/issues/133)) ([ba33539](https://github.com/TimSchoenle/terrace-legal/commit/ba335394c204d8b512f457bd39a584aacff8456c))
+* **deps:** lock file maintenance ([#134](https://github.com/TimSchoenle/terrace-legal/issues/134)) ([f0a7ebb](https://github.com/TimSchoenle/terrace-legal/commit/f0a7ebb5ed3ae0657d362afd45dfd4d1bcf4d38b))
+* **deps:** lock file maintenance ([#140](https://github.com/TimSchoenle/terrace-legal/issues/140)) ([2e462ef](https://github.com/TimSchoenle/terrace-legal/commit/2e462efd2f3ab9c82756c76ac512b3eeb7ee67c0))
+* **deps:** lock file maintenance ([#141](https://github.com/TimSchoenle/terrace-legal/issues/141)) ([a22c628](https://github.com/TimSchoenle/terrace-legal/commit/a22c628b865b6c6bb1865c0b450f0e27a5d449ad))
+* **deps:** update rust crate terrace-config to v0.18.2 ([#139](https://github.com/TimSchoenle/terrace-legal/issues/139)) ([1daa13a](https://github.com/TimSchoenle/terrace-legal/commit/1daa13af5da09c5d5516c1209c20f0e1a4d80d73))
+* **deps:** update rust crate url to v2.5.9 [security] ([#137](https://github.com/TimSchoenle/terrace-legal/issues/137)) ([e5c1882](https://github.com/TimSchoenle/terrace-legal/commit/e5c188249bf330df2e0d2ae22291c93bb26745be))
+* **deps:** update rust to v1.100.0 ([#131](https://github.com/TimSchoenle/terrace-legal/issues/131)) ([c2ea12a](https://github.com/TimSchoenle/terrace-legal/commit/c2ea12a151051cd0036d560938c6a14c112e6abf))
+
 ## [0.3.7](https://github.com/TimSchoenle/terrace-legal/compare/v0.3.6...v0.3.7) (2026-11-02)
 
 
