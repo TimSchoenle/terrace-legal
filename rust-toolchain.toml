@@ -11,7 +11,7 @@
 # `rustup override` takes precedence over this file. `fuzz/` carries a nightly pin of its own,
 # which wins for anything run inside that directory.
 [toolchain]
-channel = "1.100.0"
+channel = "1.100.1"
 # What the `fmt` and `clippy` jobs run.
 components = ["rustfmt", "clippy"]
 # No `targets`: `wasm32-unknown-unknown` is only needed by the two jobs that prove the Dioxus
